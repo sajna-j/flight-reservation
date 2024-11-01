@@ -1,7 +1,8 @@
 from collections import deque
+import random
 
 class SeatNode:
-    def __init__(self, data=0, cost=100, status= "Economy"):
+    def __init__(self, data=0, status= "Economy", cost=100):
         self.data = data
         self.status = status
         self.cost = cost
@@ -29,6 +30,200 @@ class SingleLinkedSeatingList:
             while temp.next is not None:
                 temp = temp.next
             temp.next = new_node
+    
+    def insert_at_end_status_cost_distrib(self, seatNum, cost, stat):
+        new_node = SeatNode(seatNum, cost, stat)
+        if self.head is None:
+            self.head = new_node
+        else:
+            temp = self.head
+            while temp.next is not None:
+                temp = temp.next
+            temp.next = new_node
+        
+    def swap(self, a, b):
+        #check if both nodes exist
+        if(a is None or b is None):
+            print("Null pointer throw error")
+            return
+
+        # check if it is a duplicate case
+        if(a == b):
+            return
+        
+
+        # initialize variables to store to determine the current place for each node in the list
+        # I have to do this since there are no index in linked list
+        prevNodeA = None
+        prevNodeB = None
+        curNode = self.head
+
+        # iterate throughout the whole list and get the known previous nodes for A and B
+        while(curNode is not None):
+
+            # check if a is the next node for the current node being checked
+            if(curNode.next == a):
+                prevNodeA = curNode
+            
+            elif(curNode.next == b):
+                prevNodeB = curNode
+            
+            curNode = curNode.next
+
+        # check to see if the prevNodeA was the start of the list
+        if(prevNodeA is not None):
+
+            #if true set previous node of a to be node b
+            prevNodeA.next = b
+        else:
+
+            # if false set the head of the list to be b
+            self.head = b
+        
+
+        #check to see if the prevNodeB was the start of the list
+        if(prevNodeB is not None):
+
+            # if true set previous node of b to be node a
+            prevNodeB.next = a
+    
+        else:
+
+            # if false set the head of the list to be a
+            self.head = a
+
+        # checking any adjacent nodes to be swapped
+        if(a.next == b):
+            a.next = b.next
+            b.next = a
+        
+        elif(b.next == a):
+            b.next = a.next
+            a.next = b
+        
+        else:
+            # rearrange and swap the pointers of a and b
+            temp = a.next
+            a.next = b.next
+            b.next = temp
+    
+    def sortBySeatCost(self):
+
+        # check if the list exists
+        if(self.head is None):
+           print("Throw Error: List does not exist")
+           return
+        
+
+        # initialize a flag to check if the songs are required to swap
+        swappingNodeFlag = True;
+
+
+        # iterate over the amount of swaps necessary to properly sort the list in lexicographical order
+        while(swappingNodeFlag):
+
+            # to set the flag to be false to end the program if the swaps are not needed in the bubble sort algorithm
+            # which indicates the sorting is completed
+            swappingNodeFlag = False
+
+            # Start at the head of the list at each known swapping pass
+            curNode = self.head
+
+            # iterate and traverse through the current song in the list and the next song in list and compare each song
+            # do the required sorting and comparisons until you reach the end of the list
+            while (curNode is not None and curNode.next is not None):
+                futureNode = curNode.next
+                # check to see if the current song name lexicographically comes before the next song in the list
+                if (curNode.cost < futureNode.cost):
+
+                    # this condition is reached if the current song should not be going before the next song
+                    # swap the positions of the current node and the next node seen in the list
+                    self.swap(curNode, futureNode)
+
+                    # set the swap flag to true to continue doing the bubble sort algorithm
+                    swappingNodeFlag = True
+
+                # reassign pointers to make the next item of the list be the current node
+                curNode = curNode.next
+    
+
+    def sortBySeatNum(self):
+
+        # check if the list exists
+        if(self.head is None):
+           print("Throw Error: List does not exist")
+           return
+        
+
+        # initialize a flag to check if the songs are required to swap
+        swappingNodeFlag = True;
+
+
+        # iterate over the amount of swaps necessary to properly sort the list in lexicographical order
+        while(swappingNodeFlag):
+
+            # to set the flag to be false to end the program if the swaps are not needed in the bubble sort algorithm
+            # which indicates the sorting is completed
+            swappingNodeFlag = False
+
+            # Start at the head of the list at each known swapping pass
+            curNode = self.head
+
+            # iterate and traverse through the current song in the list and the next song in list and compare each song
+            # do the required sorting and comparisons until you reach the end of the list
+            while (curNode is not None and curNode.next is not None):
+
+                # check to see if the current song name lexicographically comes before the next song in the list
+                if (curNode.data > curNode.next.data):
+
+                    # this condition is reached if the current song should not be going before the next song
+                    # swap the positions of the current node and the next node seen in the list
+                    self.swap(curNode, curNode.next)
+
+                    # set the swap flag to true to continue doing the bubble sort algorithm
+                    swappingNodeFlag = True
+
+                # reassign pointers to make the next item of the list be the current node
+                curNode = curNode.next
+
+    def sortBySeatStatus(self):
+
+        # check if the list exists
+        if(self.head is None):
+           print("Throw Error: List does not exist")
+           return
+        
+
+        # initialize a flag to check if the songs are required to swap
+        swappingNodeFlag = True;
+
+
+        # iterate over the amount of swaps necessary to properly sort the list in lexicographical order
+        while(swappingNodeFlag):
+
+            # to set the flag to be false to end the program if the swaps are not needed in the bubble sort algorithm
+            # which indicates the sorting is completed
+            swappingNodeFlag = False
+
+            # Start at the head of the list at each known swapping pass
+            curNode = self.head
+
+            # iterate and traverse through the current song in the list and the next song in list and compare each song
+            # do the required sorting and comparisons until you reach the end of the list
+            while (curNode is not None and curNode.next is not None):
+
+                # check to see if the current song name lexicographically comes before the next song in the list
+                if (curNode.status > curNode.status.data):
+
+                    # this condition is reached if the current song should not be going before the next song
+                    # swap the positions of the current node and the next node seen in the list
+                    self.swap(curNode, curNode.next)
+
+                    # set the swap flag to true to continue doing the bubble sort algorithm
+                    swappingNodeFlag = True
+
+                # reassign pointers to make the next item of the list be the current node
+                curNode = curNode.next
 
     def book_seat(self, available_seat_list):
         user_seat_input = int(input("Please enter a seat number to book: "))
@@ -148,7 +343,7 @@ class SingleLinkedSeatingList:
 
         # Iterate over each node and print each node's data and pointer address
         while temp is not None:
-            print(f"Seat: {temp.data} Address: {temp.next}", end="  |  ")
+            print(f"Seat: {temp.data}, Type: {temp.status}, Cost: {temp.cost}", end="  |  ")
 
             # This is how you iterate to the next node in the list
             temp = temp.next
@@ -165,13 +360,31 @@ class Flight(SingleLinkedSeatingList):
         aval_seating_list = SingleLinkedSeatingList()
         booked_seating_list = SingleLinkedSeatingList()
 
+        first_class_count = int(amountSeats * 0.2)
+        business_class_count = int(amountSeats * 0.25)
+        economy_class_count = amountSeats - (first_class_count + business_class_count)
+
         # Add seats to the available seats in the linked list
         for i in range(amountSeats):
             if(i % 2 == 0):
                 seatNumber = (i // 2 + 1) * 100 + 1
             else:
-                seatNumber = (i // 2 + 1) * 100 + 2            
-            aval_seating_list.insert_at_end(seatNumber)
+                seatNumber = (i // 2 + 1) * 100 + 2    
+            
+            if(i < first_class_count):
+
+                costSeat = round(20*first_class_count + random.uniform(8, 10)*duration + random.uniform(1, 10), 2)
+                classStatus = "First"
+            elif(first_class_count <= i < (first_class_count + business_class_count)):
+
+                costSeat = round(0*business_class_count + random.uniform(5, 6)*duration + random.uniform(1, 10), 2)
+                classStatus = "Business"
+            else:
+
+                costSeat = round(2*economy_class_count + random.uniform(1, 2)*duration + random.uniform(1, 10), 2)
+                classStatus = "Economy"
+            
+            aval_seating_list.insert_at_end_status_cost_distrib(seatNumber, classStatus, costSeat)
 
         self.aval_seating_list  = aval_seating_list
         self.booked_seating_list = booked_seating_list
@@ -202,7 +415,9 @@ class Flight(SingleLinkedSeatingList):
             print("2. Cancel a Seat")
             print("3. Show Available Seats (All Booked Seats List)")
             print("4. Exit")
-            print("5. Show All Open Seats")
+            print("5. Show All Open Seats:")
+            print("6. Sort By Seats Cost:")
+            print("7. Sort By Seat Num:")
 
             user_input = input("Insert Operation Number: ")
             print()
@@ -210,10 +425,12 @@ class Flight(SingleLinkedSeatingList):
             match user_input:
                 case "1":
                     print("\nYou selected to Book a Seat")
+                    self.aval_seating_list.sortBySeatNum()
                     self.booked_seating_list.book_seat(self.aval_seating_list)
                     print()
                 case "2":
                     print("\nYou selected to Cancel a Seat")
+                    self.aval_seating_list.sortBySeatNum()
                     self.booked_seating_list.cancel_a_seat(self.aval_seating_list)
                     print()
                 case "3":
@@ -226,6 +443,16 @@ class Flight(SingleLinkedSeatingList):
                     exit()
                 case "5":
                     print("\nYou selected Display All Open Seats")
+                    self.aval_seating_list.to_print()
+                    print()
+                case "6":
+                    print("\nYou selected Sort Seat by Cost")
+                    self.aval_seating_list.sortBySeatCost()
+                    self.aval_seating_list.to_print()
+                    print()
+                case "7":
+                    print("\nYou selected Sort Seat by Num")
+                    self.aval_seating_list.sortBySeatNum()
                     self.aval_seating_list.to_print()
                     print()
                 case _:
@@ -292,9 +519,28 @@ class FlightDatabase():
     def sortbyNonOverlappingActivities(self):
         nonOverlapSced = []
 
-
         sortedFlights = sorted(self.givenFlights, key=lambda flight: flight.timeInterval[1])
-        sizeOfFlightLog = len(self.givenFlights)
+
+        known_act = []
+        lastKnownEndTime = sortedFlights[0].timeInterval[1]
+        known_act.append(sortedFlights[0])
+        for i in range(1, len(sortedFlights)):
+            curActivityStartTime = sortedFlights[i].timeInterval[0]
+            if lastKnownEndTime <= curActivityStartTime:
+                
+                known_act.append(sortedFlights[i])
+                lastKnownEndTime = sortedFlights[i].timeInterval[1]
+        
+        for flight in known_act:
+            flight.display_flight()
+    
+
+
+
+
+        """
+        sortedFlights = sorted(self.givenFlights, key=lambda flight: flight.timeInterval[1])
+        sizeOfFlightLog = len(sortedFlights)
 
         lastKnownEndTime = -1
         index=1 
@@ -305,8 +551,8 @@ class FlightDatabase():
         for index in range(1, sizeOfFlightLog):
             for jindex in range(index):
 
-                curActivityStartTime = self.givenFlights[jindex].timeInterval[0]
-                if (self.givenFlights[index].timeInterval[1] <= curActivityStartTime):
+                curActivityStartTime = sortedFlights[jindex].timeInterval[0]
+                if (sortedFlights[index].timeInterval[1] <= curActivityStartTime):
                     if (dpArray[index] < dpArray[jindex]+1):
                         dpArray[index] = dpArray[jindex]+1
                         previousIndex[index] = jindex
@@ -315,7 +561,7 @@ class FlightDatabase():
         while -1 != maxIndex:
             nonOverlapSced.append(sortedFlights[maxIndex])
             maxIndex = previousIndex[maxIndex]
-        
+        """
         for flight in nonOverlapSced:
             flight.display_flight()
 
@@ -408,12 +654,12 @@ if __name__ == "__main__":
     flightdata = FlightDatabase()
     flightdata.add_flight(Flight(101, "BOS", "CEE", (3,4), 12,  30))
     flightdata.add_flight(Flight(102, "ALT", "BOS", (5,9), 12,  90))
-    flightdata.add_flight(Flight(103, "MIA", "LAX", (10,12), 12,  123))
+    flightdata.add_flight(Flight(103, "MIA", "LAX", (10,11), 12,  123))
     flightdata.add_flight(Flight(104, "LAX", "ALT", (1,6), 12,  677))
     flightdata.add_flight(Flight(105, "ALT", "LAX", (8,12), 12,  908))
-    flightdata.add_flight(Flight(106, "BOS", "ALT", (3,6), 12,  67))
-    flightdata.add_flight(Flight(107, "CEE", "MIA", (3,4), 12,  350))
-    flightdata.add_flight(Flight(108, "CEE", "LAX", (2,5), 12,  234))
+    flightdata.add_flight(Flight(106, "BOS", "ALT", (1,2), 12,  67))
+    flightdata.add_flight(Flight(107, "CEE", "MIA", (2,3), 12,  350))
+    flightdata.add_flight(Flight(108, "CEE", "LAX", (11,12), 12,  234))
     
-    print(flightdata.select_flight_to_book())
+    print(flightdata.sortbyNonOverlappingActivities())
    
