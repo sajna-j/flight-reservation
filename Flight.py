@@ -140,12 +140,14 @@ class Flight(SingleLinkedSeatingList):
                 case "1":
                     print("\nYou selected to Book a Seat")
                     self.aval_seating_list.sortBySeatNum()
-                    self.booked_seating_list.book_seat(self.aval_seating_list)
+                    user_seat_input = int(input("Please enter a seat number to book: "))
+                    self.booked_seating_list.book_seat(self.aval_seating_list, user_seat_input)
                     print()
                 case "2":
                     print("\nYou selected to Cancel a Seat")
                     self.aval_seating_list.sortBySeatNum()
-                    self.booked_seating_list.cancel_a_seat(self.aval_seating_list)
+                    user_seat_input = int(input("Please enter a seat number to cancel: "))
+                    self.booked_seating_list.cancel_a_seat(self.aval_seating_list, user_seat_input)
                     print()
                 case "3":
                     print("\nYou selected Display Available Seats. (Booked Seats)")
