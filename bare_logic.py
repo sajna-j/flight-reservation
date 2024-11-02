@@ -1,4 +1,5 @@
 from collections import deque
+from datetime import datetime
 import random
 
 class SeatNode:
@@ -236,7 +237,7 @@ class SingleLinkedSeatingList:
             curr_available_seat_node = curr_available_seat_node.next
 
         if user_seat_input == curr_available_seat_node.data:
-            self.insert_at_end(user_seat_input)
+            self.insert_at_end_status_cost_distrib(user_seat_input, curr_available_seat_node.cost, curr_available_seat_node.status)
             print(f"Seat {user_seat_input} has been booked")
             print()
 
@@ -282,7 +283,7 @@ class SingleLinkedSeatingList:
 
             print()
             print(f"Add Seat: {user_seat_input} to the AVAILABLE LIST")
-            available_seat_list.add_node_at_position(index_count_aval, user_seat_input)
+            available_seat_list.add_node_at_position(index_count_aval, user_seat_input, curr_aval_seat_node.cost, curr_aval_seat_node.status)
         else:
             print("Sorry this seat cannot be cancelled")
 
@@ -309,8 +310,8 @@ class SingleLinkedSeatingList:
 
         curr_node.next = temp_node.next
 
-    def add_node_at_position(self, position_index, data):
-        new_node = SeatNode(data)
+    def add_node_at_position(self, position_index, data, overallCost, stat):
+        new_node = SeatNode(data, overallCost, stat)
         count = 0
 
         if self.head is None:
@@ -351,7 +352,7 @@ class SingleLinkedSeatingList:
         print()  # Print a newline at the end
 
 class Flight(SingleLinkedSeatingList):
-    def __init__(self, flightNumber, departureLocation, arrivalLocation, timeInterval, amountSeats=30, duration=30):
+    def __init__(self, flightNumber, departureLocation, arrivalLocation, timeInterval, date, amountSeats=30, duration=30):
         super().__init__()
         self.flightNumber = flightNumber
         self.departureLocation = departureLocation
@@ -361,7 +362,7 @@ class Flight(SingleLinkedSeatingList):
         booked_seating_list = SingleLinkedSeatingList()
 
         first_class_count = int(amountSeats * 0.2)
-        business_class_count = int(amountSeats * 0.25)
+        business_class_count = int(amountSeats * 0.2)
         economy_class_count = amountSeats - (first_class_count + business_class_count)
 
         # Add seats to the available seats in the linked list
@@ -377,7 +378,7 @@ class Flight(SingleLinkedSeatingList):
                 classStatus = "First"
             elif(first_class_count <= i < (first_class_count + business_class_count)):
 
-                costSeat = round(0*business_class_count + random.uniform(5, 6)*duration + random.uniform(1, 10), 2)
+                costSeat = round(10*business_class_count + random.uniform(5, 6)*duration + random.uniform(1, 10), 2)
                 classStatus = "Business"
             else:
 
@@ -388,11 +389,61 @@ class Flight(SingleLinkedSeatingList):
 
         self.aval_seating_list  = aval_seating_list
         self.booked_seating_list = booked_seating_list
-        self.timeInterval =timeInterval
+        self.timeInterval = timeInterval
+        self.date = date
         self.duration = duration
     
     def display_flight(self):
-        print(f'Flight ID Number: {self.flightNumber}, Departure Location: {self.departureLocation}, Arrival Location: {self.arrivalLocation}, Time Interval: {self.timeInterval}, Time Duration: {self.duration}')
+        print(f'Flight ID Number: {self.flightNumber}, Departure Location: {self.departureLocation}, Arrival Location: {self.arrivalLocation}, Date: Date: {self.date.month}/{self.date.day}/{self.date.year}, Time Interval: {self.timeInterval}, Time Duration: {self.duration}')
+    
+    def display_cheapes_seat_cost_status(self): 
+        firstlist = []
+        firstCostSum = 0
+        firstSeatNum = 0
+
+        buslist = []
+        busCostSum = 0
+        busSeatNum = 0
+
+        ecomlist = []
+        ecomCostSum = 0
+        ecomSeatNum = 0
+
+        seatDictFirst = {}
+        seatDictBus = {}
+        seatDictEcom = {}
+
+        curNode = self.aval_seating_list.head
+        while (curNode is not None):
+            current_seat_number = curNode.data
+
+            if (curNode.status == "First"):
+                firstlist.append(curNode.cost)
+                seatDictFirst[current_seat_number] = curNode.cost
+
+            elif (curNode.status == "Business"):
+                buslist.append(curNode.cost)
+                seatDictBus[current_seat_number] = curNode.cost
+
+            elif(curNode.status == "Economy"):
+                ecomlist.append(curNode.cost)
+                seatDictEcom[current_seat_number] = curNode.cost
+
+            curNode = curNode.next
+
+        firstCostSum = min(firstlist)
+        busCostSum = min(buslist)
+        ecomCostSum = min(ecomlist)
+
+        firstSeatNum = [current_seat for current_seat, seatCost in seatDictFirst.items() if seatCost == firstCostSum]
+        busSeatNum = [current_seat for current_seat, seatCost in seatDictBus.items() if seatCost == busCostSum]
+        ecomSeatNum = [current_seat for current_seat, seatCost in seatDictEcom.items() if seatCost == ecomCostSum]
+
+        print("Here is cheapest seats based on Seat Status")
+        self.display_flight()
+        print("First Class: Seat " + str(firstSeatNum)+ ", Cost: " + str(firstCostSum))
+        print("Business Class: Seat " + str(busSeatNum)+ ", Cost: " + str(busCostSum))
+        print("Economy Class: Seat " + str(ecomSeatNum)+ ", Cost: " + str(ecomCostSum))
 
     def main_menu_catalog_seating(self):
         # Initialize variables to store the single linked lists for available and booked seating
@@ -418,6 +469,7 @@ class Flight(SingleLinkedSeatingList):
             print("5. Show All Open Seats:")
             print("6. Sort By Seats Cost:")
             print("7. Sort By Seat Num:")
+            print("8. Find Cheapest Seats By Status:")
 
             user_input = input("Insert Operation Number: ")
             print()
@@ -455,11 +507,14 @@ class Flight(SingleLinkedSeatingList):
                     self.aval_seating_list.sortBySeatNum()
                     self.aval_seating_list.to_print()
                     print()
+                case "8":
+                    print("\nYou selected Sort Seat by Cheapest Seat Status")
+                    self.display_cheapes_seat_cost_status()
+                    print()
                 case _:
                     print("\nYou selected an invalid option. Please reselect your input")
                     print()
 
-    
 
 class FlightDatabase():
     
@@ -469,10 +524,13 @@ class FlightDatabase():
     def add_flight(self, givenFlight):
         self.givenFlights.append(givenFlight)
     
+    def remove_flight(self, givenFlight, remove_flightNumber):
+        self.givenFlights = [flight for flight in self.givenFlights if givenFlight.flightNumber != remove_flightNumber]
+    
     def get_flight(self, userInput):
         index = 0
         for index in range(len(self.givenFlights)):
-            if(int(userInput) == self.givenFlights[index].flightNumber):
+            if(userInput == self.givenFlights[index].flightNumber):
                 return index
         return -1
     
@@ -482,11 +540,11 @@ class FlightDatabase():
             return "Throw ERROR: NO Flights Exist"
         else:
             for currentFlight in self.givenFlights:
-                print(f'Flight ID Number: {currentFlight.flightNumber}, Departure Location: {currentFlight.departureLocation}, Arrival Location: {currentFlight.arrivalLocation}, Time Interval: {currentFlight.timeInterval}, Time Duration: {currentFlight.duration}')
+                print(f'Flight ID Number: {currentFlight.flightNumber}, Departure Location: {currentFlight.departureLocation}, Arrival Location: {currentFlight.arrivalLocation}, Date: {currentFlight.date.month}/{currentFlight.date.day}/{currentFlight.date.year}, Time Interval: {currentFlight.timeInterval}, Time Duration: {currentFlight.duration}')
     
     def checkFlightExistsBasedOnFlightId(self, userInput):
         for curFlight in self.givenFlights:
-            if(int(userInput) == int(curFlight.flightNumber)):
+            if(userInput == curFlight.flightNumber):
                 return True
         return False
     
@@ -515,6 +573,30 @@ class FlightDatabase():
         
         for curFight in self.givenFlights:
             curFight.display_flight()
+
+    def sortbyDate(self):
+        index = 0
+        jindex = 0
+        for index in range(len(self.givenFlights)):
+            for jindex in range(len(self.givenFlights)):
+                if(self.givenFlights[index].date < self.givenFlights[jindex].date):
+                   temp = self.givenFlights[index]
+                   temp2 = self.givenFlights[jindex]
+                   self.givenFlights[jindex] =  temp
+                   self.givenFlights[index] =  temp2
+        
+        for curFight in self.givenFlights:
+            curFight.display_flight()
+    
+    def sortbyDepartureAirport(self, source):
+        for curFight in self.givenFlights:
+            if(source == curFight.departureLocation):
+                curFight.display_flight()
+
+    def sortbyArrivalAirport(self, arrival):
+        for curFight in self.givenFlights:
+            if(arrival == curFight.arrivalLocation):
+                curFight.display_flight()
 
     def sortbyNonOverlappingActivities(self):
         nonOverlapSced = []
@@ -565,7 +647,7 @@ class FlightDatabase():
         for flight in nonOverlapSced:
             flight.display_flight()
 
-
+    """
     #Use BFS
     def find_indirect_flights(self, source, dest):
         known_indirect_flights = []
@@ -595,11 +677,46 @@ class FlightDatabase():
                         if flight.arrivalLocation not in visitedSet:
                             queue.append((flight.arrivalLocation, curpath))
 
+        return known_indirect_flights   
+    """
 
-        return known_indirect_flights
+
+    def find_indirect_flights_NonOverlap(self, source, dest):
+        known_indirect_flights = []
+        visitedSet = set()  # To keep track of visited nodes
+
+        departure_map = {}
+        for flight in self.givenFlights:
+            if flight.departureLocation not in departure_map:
+                departure_map[flight.departureLocation] = []
+            departure_map[flight.departureLocation].append(flight)
+        
+        queue = deque([(source, [])])
+
+        while (queue):
+            currentFlight, flightPath = queue.popleft()
+
+            if currentFlight not in visitedSet:
+                visitedSet.add(currentFlight)
+            
+                if currentFlight in departure_map:
+
+                    for next_flight in departure_map[currentFlight]:
+                        
+                        if (not flightPath or flightPath[-1].timeInterval[1] <= next_flight.timeInterval[0] 
+                        and flightPath[-1].date <= next_flight.date and (next_flight.date - flightPath[-1].date).days <= 2):
+                            new_flight_path = flightPath + [next_flight]
+
+                            if(next_flight.arrivalLocation == dest):
+                                known_indirect_flights.append([plane.flightNumber for plane in  new_flight_path])
+
+                            if flight.arrivalLocation not in visitedSet:
+                                queue.append((next_flight.arrivalLocation, new_flight_path))
+
+        return known_indirect_flights 
     
     def display_indirect_flights(self, sourceLocation, destLocation):
-        all_known_indirect_flights = self.find_indirect_flights(sourceLocation, destLocation)
+        all_known_indirect_flights = self.find_indirect_flights_NonOverlap(sourceLocation, destLocation)
 
         count = 1
 
@@ -611,8 +728,9 @@ class FlightDatabase():
                 for curIndirectFlight in curOverallFlightPath:
                     if(len(curOverallFlightPath) > 1):
                         self.givenFlights[self.get_flight(curIndirectFlight)].display_flight()
-                
                 print()
+        else:
+            print("No indirect flights available.")
 
     def display_direct_flights(self, sourceLocation, destLocation):
         count = 1
@@ -620,11 +738,12 @@ class FlightDatabase():
         if self.givenFlights is not None:
             for cur_flight in self.givenFlights:
                 
-                
                 if((cur_flight.departureLocation == sourceLocation) and (cur_flight.arrivalLocation == destLocation)):
                     print("Direct Flight Option: " + str(count))
                     cur_flight.display_flight()
                     print()
+        else:
+            print("No direct flights available.")
         
         
     def select_flight_to_book(self):
@@ -636,10 +755,8 @@ class FlightDatabase():
         toDestination = input("Please Select a Flight Arrival: " )
         index = input("1 to show avaliability or 2 to book the flight: ")
 
-        if(index == 1):
-            self.display_direct_flights(fromDestination, toDestination)
-            self.display_indirect_flights(fromDestination, toDestination)
-        if(index == 3):
+    
+        if(index == -1):
             flightdata.sortbyDuration()
         else:
             if(self.flightExists(fromDestination, toDestination)):
@@ -652,14 +769,17 @@ class FlightDatabase():
 
 if __name__ == "__main__":
     flightdata = FlightDatabase()
-    flightdata.add_flight(Flight(101, "BOS", "CEE", (3,4), 12,  30))
-    flightdata.add_flight(Flight(102, "ALT", "BOS", (5,9), 12,  90))
-    flightdata.add_flight(Flight(103, "MIA", "LAX", (10,11), 12,  123))
-    flightdata.add_flight(Flight(104, "LAX", "ALT", (1,6), 12,  677))
-    flightdata.add_flight(Flight(105, "ALT", "LAX", (8,12), 12,  908))
-    flightdata.add_flight(Flight(106, "BOS", "ALT", (1,2), 12,  67))
-    flightdata.add_flight(Flight(107, "CEE", "MIA", (2,3), 12,  350))
-    flightdata.add_flight(Flight(108, "CEE", "LAX", (11,12), 12,  234))
+    flightdata.add_flight(Flight("ASD", "BOS", "CEE", (3,4), datetime(2024, 10, 31), 12,  30))
+    flightdata.add_flight(Flight("1TFT02", "ALT", "BOS", (5,9), datetime(2024, 10, 31), 12,  90))
+    flightdata.add_flight(Flight("TFT", "MIA", "LAX", (10,11), datetime(2024, 10, 31), 12,  123))
+    flightdata.add_flight(Flight("GG", "LAX", "ALT", (1,6), datetime(2024, 10, 31), 12,  677))
+    flightdata.add_flight(Flight("GGGJV", "ALT", "LAX", (8,12), datetime(2024, 12, 31), 12,  908))
+    flightdata.add_flight(Flight("FTY", "BOS", "ALT", (1,2), datetime(2024, 10, 31), 12,  67))
+    flightdata.add_flight(Flight("UFV", "CEE", "MIA", (2,3), datetime(2024, 10, 31), 12,  350))
+    flightdata.add_flight(Flight("UGY", "CEE", "LAX", (11,12), datetime(2024, 10, 31), 12,  234))
+    flightdata.add_flight(Flight("FV", "BOS", "PHX", (4,5), datetime(2024, 11, 29), 12,  234))
+    flightdata.add_flight(Flight("FVU8", "PHX", "LAX", (11,12), datetime(2024, 11, 30), 12,  234))
     
-    print(flightdata.sortbyNonOverlappingActivities())
+    print(flightdata.display_direct_flights("BOS", "LAX"))
+    print(flightdata.display_indirect_flights("BOS", "LAX"))
    
