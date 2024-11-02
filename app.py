@@ -2,7 +2,7 @@ from flask import Flask, jsonify, request
 from flight_objects import flightdata
 from enum import Enum
 from FlightDatabase import FlightDatabase
-
+from helpers import sortbyDate, sortbyDuration
 """
 DONE GET flight by ID
 DONE GET direct and indirect flights for src & dest
@@ -22,8 +22,8 @@ class FlightSortOptions(Enum):
     DATE: str = "date"
 
 SORT_MAPPING = {
-    FlightSortOptions.DURATION: flightdata.sortbyDuration,
-    FlightSortOptions.DATE: flightdata.sortbyDate
+    FlightSortOptions.DURATION: sortbyDuration,
+    FlightSortOptions.DATE: sortbyDate
 }
 
 # Endpoint to get a flight by ID
@@ -42,9 +42,9 @@ def get_direct_flights_route():
     depart = request.args.get('depart')
     arrive = request.args.get('arrive')
     sort_by = request.args.get('sort_by')
-    if sort_by and (sort_by := FlightSortOptions(sort_by)):
-        SORT_MAPPING[sort_by]()
     results = flightdata.get_direct_flights(depart, arrive)
+    if sort_by and (sort_by := FlightSortOptions(sort_by)):
+        results = SORT_MAPPING[sort_by](results)
     return jsonify(results), 200
 
 # Endpoint to get all INDIRECT flights from route A to B
@@ -52,8 +52,11 @@ def get_direct_flights_route():
 def get_indirect_flights_route():
     depart = request.args.get('depart')
     arrive = request.args.get('arrive')
-    # sort_by = request.args.get('sort_by')
+    sort_by = request.args.get('sort_by')
     flights_results = flightdata.get_indirect_flights(depart, arrive)
+    if sort_by and (sort_by := FlightSortOptions(sort_by)):
+        flights_results = SORT_MAPPING[sort_by](flights_results)
+
     jsonable_results = []
     for indirect_flight in flights_results:
         jsonable_results.append(indirect_flight.as_list())

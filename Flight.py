@@ -178,13 +178,13 @@ class Flight(SingleLinkedSeatingList):
                     print()
 
 
-class IndirectFlight():
+class IndirectFlight(Flight):
     def __init__(self, departureLocation: str, arrivalLocation: str, innerFlights: List[Flight]):
         self.departureLocation = departureLocation
         self.arrivalLocation = arrivalLocation
         first_flight_starts = innerFlights[0].date + timedelta(hours=innerFlights[0].timeInterval[0])
         last_flight_ends = innerFlights[-1].date + timedelta(hours=innerFlights[-1].timeInterval[1])
-        self.duration = last_flight_ends - first_flight_starts
+        self.duration: datetime.timedelta = last_flight_ends - first_flight_starts
         self.date = innerFlights[0].date
         self.flights = innerFlights
     
