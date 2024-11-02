@@ -14,7 +14,7 @@ DONE GET seats of a flight sorted by cost, status, id (class)
 DONE GET available seats of a flight
 DONE GET a single seat of a flight ?
 
-POST a flight's seat as booked 
+DONE POST a flight's seat as booked 
 POST a flight's seat as cancelled (unbooked)
 
 """
@@ -111,24 +111,24 @@ def get_seat(flight_id, seat_id):
         return jsonify(seat.as_dict()), 200
     return jsonify({"error": "Seat not found"}), 404
     
-"""
+
 # Endpoint to book a seat in a flight
-@app.route('/flight/<flight_id>/seat/<int:seat_id>/book', methods=['POST'])
+@app.route('/flights/<flight_id>/seats/<int:seat_id>/book', methods=['POST'])
 def book_seat(flight_id, seat_id):
-    flight = flights.get(flight_id)
-    if flight:
-        current_seat = flight["seats"].head
-        while current_seat:
-            if current_seat.data == seat_id:
-                if current_seat.status == "Booked":
-                    return jsonify({"error": "Seat already booked"}), 400
-                current_seat.status = "Booked"
-                return jsonify({"message": f"Seat {seat_id} booked successfully"}), 200
-            current_seat = current_seat.next
-        return jsonify({"error": "Seat not found"}), 404
-    else:
+    flight_ind = flightdata.get_flight(flight_id)
+    if flight_ind == -1:
         return jsonify({"error": "Flight not found"}), 404
-"""
+    flight = flightdata.givenFlights[flight_ind]
+    
+    seat = flight.get_seat(seat_id)
+    if seat:
+        flight.aval_seating_list.sortBySeatNum()
+        flight.booked_seating_list.book_seat(flight.aval_seating_list, seat_id)
+        seat = flight.get_booked_seat(seat_id)
+        return jsonify(seat.as_dict()), 200
+    else:
+        return jsonify({"error": "Seat not found or is not available"}), 404   
+
 
 # Run Flask app if executed directly
 if __name__ == '__main__':
