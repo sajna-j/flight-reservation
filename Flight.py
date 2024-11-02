@@ -97,6 +97,15 @@ class Flight(SingleLinkedSeatingList):
         print("Business Class: Seat " + str(busSeatNum)+ ", Cost: " + str(busCostSum))
         print("Economy Class: Seat " + str(ecomSeatNum)+ ", Cost: " + str(ecomCostSum))
 
+    def as_dict(self):
+        return {
+            "flight_number": self.flightNumber,
+            "departure": self.departureLocation,
+            "arrival": self.arrivalLocation,
+            "date": self.date,
+            "duration": self.duration
+        }
+
     def main_menu_catalog_seating(self):
         # Initialize variables to store the single linked lists for available and booked seating
         # aval_seating_list = SingleLinkedSeatingList()
