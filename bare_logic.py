@@ -782,4 +782,5 @@ if __name__ == "__main__":
     
     print(flightdata.display_direct_flights("BOS", "LAX"))
     print(flightdata.display_indirect_flights("BOS", "LAX"))
-   
+   print(flightdata.select_flight_to_book()) ## WHERE THE RESERVATION OF FLIGHTS SEATS METHOD IS 
+
