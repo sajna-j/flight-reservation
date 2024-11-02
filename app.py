@@ -1,9 +1,11 @@
 from flask import Flask, jsonify, request
 from flight_objects import flightdata
+from enum import Enum
+from FlightDatabase import FlightDatabase
 
 """
-GET flight by ID
-GET direct and indirect flights for src & dest
+DONE GET flight by ID
+DONE GET direct and indirect flights for src & dest
 GET flights sorted by time, cost, etc
 GET seats of a flight sorted by cost (class)
 GET available seats of a flight
@@ -14,6 +16,15 @@ POST a flight's seat as cancelled (unbooked)
 
 """
 app = Flask(__name__)
+
+class FlightSortOptions(Enum):
+    DURATION: str = "duration"
+    DATE: str = "date"
+
+SORT_MAPPING = {
+    FlightSortOptions.DURATION: flightdata.sortbyDuration,
+    FlightSortOptions.DATE: flightdata.sortbyDate
+}
 
 # Endpoint to get a flight by ID
 @app.route('/flights/<flight_id>', methods=['GET'])
@@ -30,6 +41,9 @@ def get_flight(flight_id):
 def get_direct_flights_route():
     depart = request.args.get('depart')
     arrive = request.args.get('arrive')
+    sort_by = request.args.get('sort_by')
+    if sort_by and (sort_by := FlightSortOptions(sort_by)):
+        SORT_MAPPING[sort_by]()
     results = flightdata.get_direct_flights(depart, arrive)
     return jsonify(results), 200
 
@@ -38,8 +52,12 @@ def get_direct_flights_route():
 def get_indirect_flights_route():
     depart = request.args.get('depart')
     arrive = request.args.get('arrive')
-    results = flightdata.get_indirect_flights(depart, arrive)
-    return jsonify(results), 200
+    # sort_by = request.args.get('sort_by')
+    flights_results = flightdata.get_indirect_flights(depart, arrive)
+    jsonable_results = []
+    for indirect_flight in flights_results:
+        jsonable_results.append(indirect_flight.as_list())
+    return jsonify(jsonable_results), 200
 
 
 """

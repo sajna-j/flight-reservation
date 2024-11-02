@@ -1,5 +1,6 @@
 from collections import deque
 import random
+from Flight import Flight, IndirectFlight
 
 class FlightDatabase():
     
@@ -230,9 +231,10 @@ class FlightDatabase():
                 curr_flight_path = []
                 for curIndirectFlight in curOverallFlightPath:
                     if(len(curOverallFlightPath) > 1):
-                        curr_flight_path.append(self.givenFlights[self.get_flight(curIndirectFlight)].as_dict())
+                        curr_flight_path.append(self.givenFlights[self.get_flight(curIndirectFlight)])
+                indirect_flight = IndirectFlight(sourceLocation, destLocation, curr_flight_path)
                 if curr_flight_path:
-                    indirect_flights.append(curr_flight_path)
+                    indirect_flights.append(indirect_flight)
         return indirect_flights
 
     def display_direct_flights(self, sourceLocation, destLocation):
