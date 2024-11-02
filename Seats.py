@@ -340,13 +340,14 @@ class SingleLinkedSeatingList:
         curr_node.next = new_node
 
     def get_seat(self, seat_number):
-        curr_available_seat_node = self.available_seat_list.head
+        curr_available_seat_node = self.aval_seating_list.head
         index_count = 0
 
         while curr_available_seat_node.next is not None and curr_available_seat_node.data != seat_number:
             index_count += 1
             curr_available_seat_node = curr_available_seat_node.next
-        return curr_available_seat_node
+
+        return curr_available_seat_node if curr_available_seat_node.data == seat_number else None
     
     def to_print(self):
         # Initialize the temp node to hold the current node
