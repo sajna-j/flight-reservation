@@ -9,10 +9,13 @@ class FlightDatabase():
     def add_flight(self, givenFlight):
         self.givenFlights.append(givenFlight)
     
+    def remove_flight(self, givenFlight, remove_flightNumber):
+        self.givenFlights = [flight for flight in self.givenFlights if givenFlight.flightNumber != remove_flightNumber]
+    
     def get_flight(self, userInput):
         index = 0
         for index in range(len(self.givenFlights)):
-            if(int(userInput) == self.givenFlights[index].flightNumber):
+            if(userInput == self.givenFlights[index].flightNumber):
                 return index
         return -1
     
@@ -22,11 +25,11 @@ class FlightDatabase():
             return "Throw ERROR: NO Flights Exist"
         else:
             for currentFlight in self.givenFlights:
-                print(f'Flight ID Number: {currentFlight.flightNumber}, Departure Location: {currentFlight.departureLocation}, Arrival Location: {currentFlight.arrivalLocation}, Time Interval: {currentFlight.timeInterval}, Time Duration: {currentFlight.duration}')
+                print(f'Flight ID Number: {currentFlight.flightNumber}, Departure Location: {currentFlight.departureLocation}, Arrival Location: {currentFlight.arrivalLocation}, Date: {currentFlight.date.month}/{currentFlight.date.day}/{currentFlight.date.year}, Time Interval: {currentFlight.timeInterval}, Time Duration: {currentFlight.duration}')
     
     def checkFlightExistsBasedOnFlightId(self, userInput):
         for curFlight in self.givenFlights:
-            if(int(userInput) == int(curFlight.flightNumber)):
+            if(userInput == curFlight.flightNumber):
                 return True
         return False
     
@@ -55,6 +58,30 @@ class FlightDatabase():
         
         for curFight in self.givenFlights:
             curFight.display_flight()
+
+    def sortbyDate(self):
+        index = 0
+        jindex = 0
+        for index in range(len(self.givenFlights)):
+            for jindex in range(len(self.givenFlights)):
+                if(self.givenFlights[index].date < self.givenFlights[jindex].date):
+                   temp = self.givenFlights[index]
+                   temp2 = self.givenFlights[jindex]
+                   self.givenFlights[jindex] =  temp
+                   self.givenFlights[index] =  temp2
+        
+        for curFight in self.givenFlights:
+            curFight.display_flight()
+    
+    def sortbyDepartureAirport(self, source):
+        for curFight in self.givenFlights:
+            if(source == curFight.departureLocation):
+                curFight.display_flight()
+
+    def sortbyArrivalAirport(self, arrival):
+        for curFight in self.givenFlights:
+            if(arrival == curFight.arrivalLocation):
+                curFight.display_flight()
 
     def sortbyNonOverlappingActivities(self):
         nonOverlapSced = []
@@ -105,7 +132,7 @@ class FlightDatabase():
         for flight in nonOverlapSced:
             flight.display_flight()
 
-
+    """
     #Use BFS
     def find_indirect_flights(self, source, dest):
         known_indirect_flights = []
@@ -135,11 +162,46 @@ class FlightDatabase():
                         if flight.arrivalLocation not in visitedSet:
                             queue.append((flight.arrivalLocation, curpath))
 
+        return known_indirect_flights   
+    """
 
-        return known_indirect_flights
+
+    def find_indirect_flights_NonOverlap(self, source, dest):
+        known_indirect_flights = []
+        visitedSet = set()  # To keep track of visited nodes
+
+        departure_map = {}
+        for flight in self.givenFlights:
+            if flight.departureLocation not in departure_map:
+                departure_map[flight.departureLocation] = []
+            departure_map[flight.departureLocation].append(flight)
+        
+        queue = deque([(source, [])])
+
+        while (queue):
+            currentFlight, flightPath = queue.popleft()
+
+            if currentFlight not in visitedSet:
+                visitedSet.add(currentFlight)
+            
+                if currentFlight in departure_map:
+
+                    for next_flight in departure_map[currentFlight]:
+                        
+                        if (not flightPath or flightPath[-1].timeInterval[1] <= next_flight.timeInterval[0] 
+                        and flightPath[-1].date <= next_flight.date and (next_flight.date - flightPath[-1].date).days <= 2):
+                            new_flight_path = flightPath + [next_flight]
+
+                            if(next_flight.arrivalLocation == dest):
+                                known_indirect_flights.append([plane.flightNumber for plane in  new_flight_path])
+
+                            if flight.arrivalLocation not in visitedSet:
+                                queue.append((next_flight.arrivalLocation, new_flight_path))
+
+        return known_indirect_flights 
     
     def display_indirect_flights(self, sourceLocation, destLocation):
-        all_known_indirect_flights = self.find_indirect_flights(sourceLocation, destLocation)
+        all_known_indirect_flights = self.find_indirect_flights_NonOverlap(sourceLocation, destLocation)
 
         count = 1
 
@@ -151,8 +213,9 @@ class FlightDatabase():
                 for curIndirectFlight in curOverallFlightPath:
                     if(len(curOverallFlightPath) > 1):
                         self.givenFlights[self.get_flight(curIndirectFlight)].display_flight()
-                
                 print()
+        else:
+            print("No indirect flights available.")
 
     def display_direct_flights(self, sourceLocation, destLocation):
         count = 1
@@ -160,11 +223,12 @@ class FlightDatabase():
         if self.givenFlights is not None:
             for cur_flight in self.givenFlights:
                 
-                
                 if((cur_flight.departureLocation == sourceLocation) and (cur_flight.arrivalLocation == destLocation)):
                     print("Direct Flight Option: " + str(count))
                     cur_flight.display_flight()
                     print()
+        else:
+            print("No direct flights available.")
         
         
     def select_flight_to_book(self):
@@ -176,10 +240,8 @@ class FlightDatabase():
         toDestination = input("Please Select a Flight Arrival: " )
         index = input("1 to show avaliability or 2 to book the flight: ")
 
-        if(index == 1):
-            self.display_direct_flights(fromDestination, toDestination)
-            self.display_indirect_flights(fromDestination, toDestination)
-        if(index == 3):
+    
+        if(index == -1):
             flightdata.sortbyDuration()
         else:
             if(self.flightExists(fromDestination, toDestination)):
@@ -188,3 +250,4 @@ class FlightDatabase():
                 self.givenFlights[self.get_flight(flight)].main_menu_catalog_seating()
             else:
                 print("False")
+  

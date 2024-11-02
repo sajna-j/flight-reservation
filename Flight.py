@@ -3,7 +3,7 @@ from collections import deque
 import random
 
 class Flight(SingleLinkedSeatingList):
-    def __init__(self, flightNumber, departureLocation, arrivalLocation, timeInterval, amountSeats=30, duration=30):
+    def __init__(self, flightNumber, departureLocation, arrivalLocation, timeInterval, date, amountSeats=30, duration=30):
         super().__init__()
         self.flightNumber = flightNumber
         self.departureLocation = departureLocation
@@ -13,7 +13,7 @@ class Flight(SingleLinkedSeatingList):
         booked_seating_list = SingleLinkedSeatingList()
 
         first_class_count = int(amountSeats * 0.2)
-        business_class_count = int(amountSeats * 0.25)
+        business_class_count = int(amountSeats * 0.2)
         economy_class_count = amountSeats - (first_class_count + business_class_count)
 
         # Add seats to the available seats in the linked list
@@ -29,7 +29,7 @@ class Flight(SingleLinkedSeatingList):
                 classStatus = "First"
             elif(first_class_count <= i < (first_class_count + business_class_count)):
 
-                costSeat = round(0*business_class_count + random.uniform(5, 6)*duration + random.uniform(1, 10), 2)
+                costSeat = round(10*business_class_count + random.uniform(5, 6)*duration + random.uniform(1, 10), 2)
                 classStatus = "Business"
             else:
 
@@ -40,11 +40,61 @@ class Flight(SingleLinkedSeatingList):
 
         self.aval_seating_list  = aval_seating_list
         self.booked_seating_list = booked_seating_list
-        self.timeInterval =timeInterval
+        self.timeInterval = timeInterval
+        self.date = date
         self.duration = duration
     
     def display_flight(self):
-        print(f'Flight ID Number: {self.flightNumber}, Departure Location: {self.departureLocation}, Arrival Location: {self.arrivalLocation}, Time Interval: {self.timeInterval}, Time Duration: {self.duration}')
+        print(f'Flight ID Number: {self.flightNumber}, Departure Location: {self.departureLocation}, Arrival Location: {self.arrivalLocation}, Date: Date: {self.date.month}/{self.date.day}/{self.date.year}, Time Interval: {self.timeInterval}, Time Duration: {self.duration}')
+    
+    def display_cheapes_seat_cost_status(self): 
+        firstlist = []
+        firstCostSum = 0
+        firstSeatNum = 0
+
+        buslist = []
+        busCostSum = 0
+        busSeatNum = 0
+
+        ecomlist = []
+        ecomCostSum = 0
+        ecomSeatNum = 0
+
+        seatDictFirst = {}
+        seatDictBus = {}
+        seatDictEcom = {}
+
+        curNode = self.aval_seating_list.head
+        while (curNode is not None):
+            current_seat_number = curNode.data
+
+            if (curNode.status == "First"):
+                firstlist.append(curNode.cost)
+                seatDictFirst[current_seat_number] = curNode.cost
+
+            elif (curNode.status == "Business"):
+                buslist.append(curNode.cost)
+                seatDictBus[current_seat_number] = curNode.cost
+
+            elif(curNode.status == "Economy"):
+                ecomlist.append(curNode.cost)
+                seatDictEcom[current_seat_number] = curNode.cost
+
+            curNode = curNode.next
+
+        firstCostSum = min(firstlist)
+        busCostSum = min(buslist)
+        ecomCostSum = min(ecomlist)
+
+        firstSeatNum = [current_seat for current_seat, seatCost in seatDictFirst.items() if seatCost == firstCostSum]
+        busSeatNum = [current_seat for current_seat, seatCost in seatDictBus.items() if seatCost == busCostSum]
+        ecomSeatNum = [current_seat for current_seat, seatCost in seatDictEcom.items() if seatCost == ecomCostSum]
+
+        print("Here is cheapest seats based on Seat Status")
+        self.display_flight()
+        print("First Class: Seat " + str(firstSeatNum)+ ", Cost: " + str(firstCostSum))
+        print("Business Class: Seat " + str(busSeatNum)+ ", Cost: " + str(busCostSum))
+        print("Economy Class: Seat " + str(ecomSeatNum)+ ", Cost: " + str(ecomCostSum))
 
     def main_menu_catalog_seating(self):
         # Initialize variables to store the single linked lists for available and booked seating
@@ -70,6 +120,7 @@ class Flight(SingleLinkedSeatingList):
             print("5. Show All Open Seats:")
             print("6. Sort By Seats Cost:")
             print("7. Sort By Seat Num:")
+            print("8. Find Cheapest Seats By Status:")
 
             user_input = input("Insert Operation Number: ")
             print()
@@ -106,6 +157,10 @@ class Flight(SingleLinkedSeatingList):
                     print("\nYou selected Sort Seat by Num")
                     self.aval_seating_list.sortBySeatNum()
                     self.aval_seating_list.to_print()
+                    print()
+                case "8":
+                    print("\nYou selected Sort Seat by Cheapest Seat Status")
+                    self.display_cheapes_seat_cost_status()
                     print()
                 case _:
                     print("\nYou selected an invalid option. Please reselect your input")

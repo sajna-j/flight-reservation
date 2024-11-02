@@ -236,7 +236,7 @@ class SingleLinkedSeatingList:
             curr_available_seat_node = curr_available_seat_node.next
 
         if user_seat_input == curr_available_seat_node.data:
-            self.insert_at_end(user_seat_input)
+            self.insert_at_end_status_cost_distrib(user_seat_input, curr_available_seat_node.cost, curr_available_seat_node.status)
             print(f"Seat {user_seat_input} has been booked")
             print()
 
@@ -282,7 +282,7 @@ class SingleLinkedSeatingList:
 
             print()
             print(f"Add Seat: {user_seat_input} to the AVAILABLE LIST")
-            available_seat_list.add_node_at_position(index_count_aval, user_seat_input)
+            available_seat_list.add_node_at_position(index_count_aval, user_seat_input, curr_aval_seat_node.cost, curr_aval_seat_node.status)
         else:
             print("Sorry this seat cannot be cancelled")
 
@@ -309,8 +309,8 @@ class SingleLinkedSeatingList:
 
         curr_node.next = temp_node.next
 
-    def add_node_at_position(self, position_index, data):
-        new_node = SeatNode(data)
+    def add_node_at_position(self, position_index, data, overallCost, stat):
+        new_node = SeatNode(data, overallCost, stat)
         count = 0
 
         if self.head is None:
