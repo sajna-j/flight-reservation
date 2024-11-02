@@ -15,8 +15,7 @@ DONE GET available seats of a flight
 DONE GET a single seat of a flight ?
 
 DONE POST a flight's seat as booked 
-POST a flight's seat as cancelled (unbooked)
-
+DONE POST a flight's seat as cancelled (unbooked)
 """
 app = Flask(__name__)
 
@@ -128,6 +127,26 @@ def book_seat(flight_id, seat_id):
         return jsonify(seat.as_dict()), 200
     else:
         return jsonify({"error": "Seat not found or is not available"}), 404   
+
+        if curr_booked_seat_node == None:
+            return None
+    
+# Endpoint to cancel a seat in a flight
+@app.route('/flights/<flight_id>/seats/<int:seat_id>/cancel', methods=['POST'])
+def cancel_seat(flight_id, seat_id):
+    flight_ind = flightdata.get_flight(flight_id)
+    if flight_ind == -1:
+        return jsonify({"error": "Flight not found"}), 404
+    flight = flightdata.givenFlights[flight_ind]
+    
+    seat = flight.get_booked_seat(seat_id)
+    if seat:
+        flight.aval_seating_list.sortBySeatNum()
+        flight.booked_seating_list.cancel_a_seat(flight.aval_seating_list, seat_id)
+        seat = flight.get_seat(seat_id)
+        return jsonify(seat.as_dict()), 200
+    else:
+        return jsonify({"error": "Seat does not exist or is either available and cannot be cancelled"}), 404   
 
 
 # Run Flask app if executed directly

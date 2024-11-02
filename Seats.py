@@ -339,6 +339,9 @@ class SingleLinkedSeatingList:
     def get_seat(self, seat_number):
         curr_available_seat_node = self.aval_seating_list.head
         index_count = 0
+        
+        if curr_booked_seat_node == None:
+            return None
 
         while curr_available_seat_node.next is not None and curr_available_seat_node.data != seat_number:
             index_count += 1
@@ -349,6 +352,9 @@ class SingleLinkedSeatingList:
     def get_booked_seat(self, seat_number):
         curr_booked_seat_node = self.booked_seating_list.head
         index_count = 0
+
+        if curr_booked_seat_node == None:
+            return None
 
         while curr_booked_seat_node.next is not None and curr_booked_seat_node.data != seat_number:
             index_count += 1
