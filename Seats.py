@@ -7,6 +7,13 @@ class SeatNode:
         self.status = status
         self.cost = cost
         self.next = None
+    
+    def as_dict(self):
+        return {
+            "seat_number": self.data,
+            "status": self.status,
+            "cost": self.cost
+        }
 
 class SingleLinkedSeatingList:
     def __init__(self):
@@ -331,6 +338,15 @@ class SingleLinkedSeatingList:
 
         new_node.next = curr_node.next
         curr_node.next = new_node
+
+    def get_seat(self, seat_number):
+        curr_available_seat_node = self.available_seat_list.head
+        index_count = 0
+
+        while curr_available_seat_node.next is not None and curr_available_seat_node.data != seat_number:
+            index_count += 1
+            curr_available_seat_node = curr_available_seat_node.next
+        return curr_available_seat_node
     
     def to_print(self):
         # Initialize the temp node to hold the current node
@@ -349,3 +365,13 @@ class SingleLinkedSeatingList:
             temp = temp.next
 
         print()  # Print a newline at the end
+
+    def as_list(self):
+        """ JSONifyable represention of the linked list """
+        temp = self.head
+        seats_list = []
+        while temp is not None:
+            print(f"Seat: {temp.data}, Type: {temp.status}, Cost: {temp.cost}", end="  |  ")
+            seats_list.append(temp.as_dict())
+            temp = temp.next
+        return seats_list
