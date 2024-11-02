@@ -1,6 +1,7 @@
 from Seats import SingleLinkedSeatingList
 from collections import deque
 import random
+from datetime import datetime
 
 class Flight(SingleLinkedSeatingList):
     def __init__(self, flightNumber, departureLocation, arrivalLocation, timeInterval, date, amountSeats=30, duration=30):

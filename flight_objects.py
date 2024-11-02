@@ -2,6 +2,7 @@ from collections import deque
 import random
 from FlightDatabase import FlightDatabase
 from Flight import Flight
+from datetime import datetime
 
 flightdata = FlightDatabase()
 flightdata.add_flight(Flight("ASD", "BOS", "CEE", (3,4), datetime(2024, 10, 31), 12,  30))
