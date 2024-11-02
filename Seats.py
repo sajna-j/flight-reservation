@@ -141,7 +141,7 @@ class SingleLinkedSeatingList:
             while (curNode is not None and curNode.next is not None):
                 futureNode = curNode.next
                 # check to see if the current song name lexicographically comes before the next song in the list
-                if (curNode.cost < futureNode.cost):
+                if (curNode.cost > futureNode.cost):
 
                     # this condition is reached if the current song should not be going before the next song
                     # swap the positions of the current node and the next node seen in the list
@@ -220,7 +220,7 @@ class SingleLinkedSeatingList:
             while (curNode is not None and curNode.next is not None):
 
                 # check to see if the current song name lexicographically comes before the next song in the list
-                if (curNode.status > curNode.status.data):
+                if (curNode.status > curNode.status):
 
                     # this condition is reached if the current song should not be going before the next song
                     # swap the positions of the current node and the next node seen in the list

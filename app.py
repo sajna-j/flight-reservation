@@ -3,11 +3,14 @@ from flight_objects import flightdata
 from enum import Enum
 from FlightDatabase import FlightDatabase
 from helpers import sortbyDate, sortbyDuration
+from Flight import Flight
+from Seats import SingleLinkedSeatingList
+
 """
 DONE GET flight by ID
 DONE GET direct and indirect flights for src & dest
 DONE GET flights sorted by time, depart date etc
-GET seats of a flight sorted by cost (class)
+DONE GET seats of a flight sorted by cost, status, id (class)
 DONE GET available seats of a flight
 DONE GET a single seat of a flight ?
 
@@ -21,9 +24,21 @@ class FlightSortOptions(Enum):
     DURATION: str = "duration"
     DATE: str = "date"
 
+class SeatSortOptions(Enum):
+    COST: str = "cost"
+    ID: str = "id"
+    STATUS: str = "status"
+    
+    @classmethod
+    def _missing_(cls, value):
+        return cls.ID  # Default to ID sort if value not found
+
 SORT_MAPPING = {
     FlightSortOptions.DURATION: sortbyDuration,
-    FlightSortOptions.DATE: sortbyDate
+    FlightSortOptions.DATE: sortbyDate,
+    SeatSortOptions.COST: SingleLinkedSeatingList.sortBySeatCost,
+    SeatSortOptions.ID: SingleLinkedSeatingList.sortBySeatNum,
+    SeatSortOptions.STATUS: SingleLinkedSeatingList.sortBySeatStatus
 }
 
 # Endpoint to get a flight by ID
@@ -66,9 +81,18 @@ def get_indirect_flights_route():
 # Endpoint to get all seats in a flight
 @app.route('/flights/<flight_id>/seats', methods=['GET'])
 def get_seats(flight_id):
+    sort_by = request.args.get('sort_by')
+
     flight_ind = flightdata.get_flight(flight_id)
     if flight_ind != -1:
         flight = flightdata.givenFlights[flight_ind]
+        
+        if sort_by and (sort_by := SeatSortOptions(sort_by)):
+            SORT_MAPPING[sort_by](flight.aval_seating_list)
+        else:
+            # by default, the seats should just show by seat number
+            SingleLinkedSeatingList.sortBySeatNum(flight.aval_seating_list)
+
         seats = flight.aval_seating_list.as_list()
         return jsonify(seats), 200
     return jsonify({"error": "Flight not found"}), 404
