@@ -66,7 +66,6 @@ def get_indirect_flights_route():
 # Endpoint to get all seats in a flight
 @app.route('/flights/<flight_id>/seats', methods=['GET'])
 def get_seats(flight_id):
-
     flight_ind = flightdata.get_flight(flight_id)
     if flight_ind != -1:
         flight = flightdata.givenFlights[flight_ind]
@@ -74,21 +73,21 @@ def get_seats(flight_id):
         return jsonify(seats), 200
     return jsonify({"error": "Flight not found"}), 404
 
-"""
-# Endpoint to get a specific seat by ID in a flight
-@app.route('/flight/<flight_id>/seat/<int:seat_id>', methods=['GET'])
-def get_seat(flight_id, seat_id):
-    flight = flights.get(flight_id)
-    if flight:
-        current_seat = flight["seats"].head
-        while current_seat:
-            if current_seat.data == seat_id:
-                return jsonify({"seat_num": current_seat.data, "status": current_seat.status, "cost": current_seat.cost}), 200
-            current_seat = current_seat.next
-        return jsonify({"error": "Seat not found"}), 404
-    else:
-        return jsonify({"error": "Flight not found"}), 404
 
+# Endpoint to get a specific seat by ID in a flight
+@app.route('/flights/<flight_id>/seats/<int:seat_id>', methods=['GET'])
+def get_seat(flight_id, seat_id):
+    flight_ind = flightdata.get_flight(flight_id)
+    if flight_ind == -1:
+        return jsonify({"error": "Flight not found"}), 404
+    flight = flightdata.givenFlights[flight_ind]
+    
+    seat = flight.get_seat(seat_id)
+    if seat:
+        return jsonify(seat.as_dict()), 200
+    return jsonify({"error": "Seat not found"}), 404
+    
+"""
 # Endpoint to book a seat in a flight
 @app.route('/flight/<flight_id>/seat/<int:seat_id>/book', methods=['POST'])
 def book_seat(flight_id, seat_id):
