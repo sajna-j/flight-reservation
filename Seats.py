@@ -340,7 +340,7 @@ class SingleLinkedSeatingList:
         curr_available_seat_node = self.aval_seating_list.head
         index_count = 0
         
-        if curr_booked_seat_node == None:
+        if curr_available_seat_node == None:
             return None
 
         while curr_available_seat_node.next is not None and curr_available_seat_node.data != seat_number:
