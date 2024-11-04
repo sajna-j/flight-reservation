@@ -44,7 +44,7 @@ SORT_MAPPING = {
 @app.route('/flights/<flight_id>', methods=['GET'])
 def get_flight(flight_id):
     flight_ind = flightdata.get_flight(flight_id)
-    if flight := flightdata.givenFlights[flight_ind]:
+    if (flight_ind != -1) and (flight := flightdata.givenFlights[flight_ind]):
         return jsonify(flight.as_dict()), 200
     else:
         return jsonify({"error": "Flight not found"}), 404
