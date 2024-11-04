@@ -59,7 +59,10 @@ def get_direct_flights_route():
     results = flightdata.get_direct_flights(depart, arrive)
     if sort_by and (sort_by := FlightSortOptions(sort_by)):
         results = SORT_MAPPING[sort_by](results)
-    return jsonify(results), 200
+    jsonable_flights = []
+    for flight in results:
+        jsonable_flights.append(flight.as_dict())
+    return jsonify(jsonable_flights), 200
 
 # Endpoint to get all INDIRECT flights from route A to B
 @app.route('/indirect-flights', methods=['GET'])

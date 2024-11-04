@@ -256,7 +256,7 @@ class FlightDatabase():
         if self.givenFlights is not None:
             for cur_flight in self.givenFlights:
                 if((cur_flight.departureLocation == sourceLocation) and (cur_flight.arrivalLocation == destLocation)):
-                    direct_flights.append(cur_flight.as_dict())
+                    direct_flights.append(cur_flight)
         return direct_flights
         
         
