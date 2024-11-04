@@ -7,6 +7,7 @@ from datetime import datetime
 flightdata = FlightDatabase()
 
 '''
+# Dante's test objects
 ======================================================================================================================
 flightdata.add_flight(Flight("ASD", "BOS", "CEE", (3,4), datetime(2024, 10, 31), 12,  30))
 flightdata.add_flight(Flight("1TFT02", "ALT", "BOS", (5,9), datetime(2024, 10, 31), 12,  90))
@@ -25,37 +26,46 @@ print(flightdata.select_flight_to_book()) ## WHERE THE RESERVATION OF FLIGHTS SE
 ======================================================================================================================
 '''
 
-
-
+'''
 # ======================================================================================================================
 # Test to display direct flights
+# Should Output 2 direct flights
 flightdata.add_flight(Flight("DEL", "BOS", "LAX", (3,9), datetime(2024, 10, 31), 12,  360))
 flightdata.add_flight(Flight("SPR", "BOS", "LAX", (2,8), datetime(2024, 10, 31), 12,  360))
+flightdata.display_direct_flights("BOS", "LAX")
+# =====================================================================================================================
+'''
 
+'''
+# ======================================================================================================================
 # Test direct flight overnight. May want to output a warning about overnight flight?
 flightdata.add_flight(Flight("AAL", "BOS", "LAX", (11,4), datetime(2024, 10, 31), 12,  360))
-print(flightdata.display_direct_flights("BOS", "LAX"))
+flightdata.display_direct_flights("BOS", "LAX")
+# =====================================================================================================================
+'''
 
-
+'''
+# ======================================================================================================================
 # Test to display indirect flights. Should Output 4 different indirect flights
 flightdata.add_flight(Flight("JET1", "BOS", "IAH", (2,4), datetime(2024, 10, 31), 12,  250))
 flightdata.add_flight(Flight("JET2", "BOS", "IAH", (1,3), datetime(2024, 10, 31), 12,  250))
 flightdata.add_flight(Flight("JET3", "IAH", "LAX", (5,9), datetime(2024, 10, 31), 12,  200))
 flightdata.add_flight(Flight("JET4", "IAH", "LAX", (6,10), datetime(2024, 10, 31), 12,  200))
-print(flightdata.display_indirect_flights("BOS", "LAX"))
-
-
-# Test to display indirect flights. Should Output an option for connecting overnight flight
-flightdata.add_flight(Flight("AAA", "BOS", "IAH", (9,11), datetime(2024, 10, 31), 12,  250))
-flightdata.add_flight(Flight("AAB", "IAH", "LAX", (1,3), datetime(2024, 11, 1), 12,  250))
-print(flightdata.display_indirect_flights("BOS", "LAX"))
-
-print(flightdata.select_flight_to_book()) ## WHERE THE RESERVATION OF FLIGHTS SEATS METHOD IS 
+flightdata.display_indirect_flights("BOS", "LAX")
 # =====================================================================================================================
-
-
+'''
 
 '''
+# ======================================================================================================================
+# Test to display indirect flights. Should Output an option for connecting overnight flight
+flightdata.add_flight(Flight("AAA", "BOS", "IAH", (21,23), datetime(2024, 10, 31), 12,  250))
+flightdata.add_flight(Flight("AAB", "IAH", "LAX", (1,3), datetime(2024, 11, 1), 12,  250))
+flightdata.display_indirect_flights("BOS", "LAX")
+# =====================================================================================================================
+'''
+
+
+
 #=====================================================================================================================
 # The flights listed below correspond with 5 different airports
 # Depending on on the origin and destination, there should be dirrect and connecting flights
@@ -82,16 +92,17 @@ flightdata.add_flight(Flight("CC11", "JFK", "BOS", (22, 23), datetime(2024, 11, 
 flightdata.add_flight(Flight("CC12", "JFK", "DEN", (10, 13), datetime(2024, 11, 2), 25, 180))
 flightdata.add_flight(Flight("CC13", "JFK", "ORD", (18, 20), datetime(2024, 11, 3), 30, 120))
 flightdata.add_flight(Flight("CC14", "JFK", "LAX", (16, 19), datetime(2024, 11, 4), 20, 300))
-flightdata.add_flight(Flight("CC15", "JFK", "LAX", (14, 17), datetime(2024, 11, 6), 30, 300))
-flightdata.add_flight(Flight("CC16", "JFK", "ORD", (9, 12), datetime(2024, 11, 5), 25, 180))
+flightdata.add_flight(Flight("CC15", "JFK", "ORD", (9, 12), datetime(2024, 11, 5), 25, 180))
+flightdata.add_flight(Flight("CC16", "JFK", "LAX", (14, 17), datetime(2024, 11, 6), 30, 300))
+
 
 # Flights from DEN
-flightdata.add_flight(Flight("DD13", "DEN", "LAX", (11, 14), datetime(2024, 11, 1), 20, 180))
+flightdata.add_flight(Flight("DD11", "DEN", "LAX", (11, 14), datetime(2024, 11, 1), 20, 180))
 flightdata.add_flight(Flight("DD12", "DEN", "ORD", (14, 16), datetime(2024, 11, 2), 25, 120))
-flightdata.add_flight(Flight("DD11", "DEN", "JFK", (14, 17), datetime(2024, 11, 3), 30, 180))
-flightdata.add_flight(Flight("DD15", "DEN", "JFK", (12, 15), datetime(2024, 11, 4), 20, 180))
-flightdata.add_flight(Flight("DD14", "DEN", "LAX", (16, 18), datetime(2024, 11, 5), 25, 180))
-flightdata.add_flight(Flight("DD15", "DEN", "JFK", (10, 13), datetime(2024, 11, 6), 30, 180))
+flightdata.add_flight(Flight("DD13", "DEN", "JFK", (14, 17), datetime(2024, 11, 3), 30, 180))
+flightdata.add_flight(Flight("DD14", "DEN", "JFK", (12, 15), datetime(2024, 11, 4), 20, 180))
+flightdata.add_flight(Flight("DD15", "DEN", "LAX", (16, 18), datetime(2024, 11, 5), 25, 180))
+flightdata.add_flight(Flight("DD16", "DEN", "JFK", (10, 13), datetime(2024, 11, 6), 30, 180))
 
 # Flights from ORD
 flightdata.add_flight(Flight("EE11", "ORD", "JFK", (19, 21), datetime(2024, 11, 1), 20, 120))
@@ -99,12 +110,8 @@ flightdata.add_flight(Flight("EE12", "ORD", "LAX", (17, 20), datetime(2024, 11, 
 flightdata.add_flight(Flight("EE13", "ORD", "BOS", (21, 23), datetime(2024, 11, 3), 30, 180))
 flightdata.add_flight(Flight("EE14", "ORD", "DEN", (9, 11), datetime(2024, 11, 4), 20, 120))
 flightdata.add_flight(Flight("EE15", "ORD", "DEN", (13, 15), datetime(2024, 11, 5), 25, 120))
-flightdata.add_flight(Flight("EE15", "ORD", "BOS", (22, 23), datetime(2024, 11, 6), 30, 120))
+flightdata.add_flight(Flight("EE16", "ORD", "BOS", (22, 23), datetime(2024, 11, 6), 30, 120))
 
-print(flightdata.display_indirect_flights("BOS", "LAX"))
-
-
+flightdata.display_indirect_flights("BOS", "LAX")
 
 #=====================================================================================================================
-
-'''
