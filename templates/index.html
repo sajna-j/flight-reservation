@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Flight Booking System</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        h1, h2 {
+            color: #333;
+        }
+        input, select, button {
+            margin: 5px 0;
+            padding: 5px;
+        }
+        #results {
+            margin-top: 20px;
+            border: 1px solid #ddd;
+            padding: 10px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Flight Booking System</h1>
+
+    <h2>Search Flights</h2>
+    <input type="text" id="departInput" placeholder="Departure">
+    <input type="text" id="arriveInput" placeholder="Arrival">
+    <select id="flightType">
+        <option value="direct">Direct Flights</option>
+        <option value="indirect">Indirect Flights</option>
+    </select>
+    <select id="sortBy">
+        <option value="date">Sort by Date</option>
+        <option value="duration">Sort by Duration</option>
+    </select>
+    <button onclick="searchFlights()">Search</button>
+
+    <h2>View Seats</h2>
+    <input type="text" id="flightIdInput" placeholder="Flight ID">
+    <select id="seatSortBy">
+        <option value="id">Sort by ID</option>
+        <option value="cost">Sort by Cost</option>
+        <option value="status">Sort by Status</option>
+    </select>
+    <button onclick="viewSeats()">View Seats</button>
+
+    <h2>Book/Cancel Seat</h2>
+    <input type="text" id="bookFlightId" placeholder="Flight ID">
+    <input type="number" id="seatId" placeholder="Seat ID">
+    <button onclick="bookSeat()">Book Seat</button>
+    <button onclick="cancelSeat()">Cancel Seat</button>
+
+    <div id="results"></div>
+
+    <script>
+        const API_URL = 'http://127.0.0.1:5000';
+
+        async function searchFlights() {
+            const depart = document.getElementById('departInput').value;
+            const arrive = document.getElementById('arriveInput').value;
+            const flightType = document.getElementById('flightType').value;
+            const sortBy = document.getElementById('sortBy').value;
+
+            const url = `${API_URL}/${flightType}-flights?depart=${depart}&arrive=${arrive}&sort_by=${sortBy}`;
+            console.log(url);
+            try {
+                const response = await fetch(url);
+                const data = await response.json();
+                displayResults(data);
+            } catch (error) {
+                console.error('Error:', error);
+                displayResults('An error occurred while fetching flights.');
+            }
+        }
+
+        async function viewSeats() {
+            const flightId = document.getElementById('flightIdInput').value;
+            const sortBy = document.getElementById('seatSortBy').value;
+
+            const url = `${API_URL}/flights/${flightId}/seats?sort_by=${sortBy}`;
+
+            try {
+                const response = await fetch(url);
+                const data = await response.json();
+                displayResults(data);
+            } catch (error) {
+                console.error('Error:', error);
+                displayResults('An error occurred while fetching seats.');
+            }
+        }
+
+        async function bookSeat() {
+            const flightId = document.getElementById('bookFlightId').value;
+            const seatId = document.getElementById('seatId').value;
+
+            const url = `${API_URL}/flights/${flightId}/seats/${seatId}/book`;
+
+            try {
+                const response = await fetch(url, { method: 'POST' });
+                const data = await response.json();
+                displayResults(data);
+            } catch (error) {
+                console.error('Error:', error);
+                displayResults('An error occurred while booking the seat.');
+            }
+        }
+
+        async function cancelSeat() {
+            const flightId = document.getElementById('bookFlightId').value;
+            const seatId = document.getElementById('seatId').value;
+
+            const url = `${API_URL}/flights/${flightId}/seats/${seatId}/cancel`;
+
+            try {
+                const response = await fetch(url, { method: 'POST' });
+                const data = await response.json();
+                displayResults(data);
+            } catch (error) {
+                console.error('Error:', error);
+                displayResults('An error occurred while canceling the seat.');
+            }
+        }
+
+        function displayResults(data) {
+            const resultsDiv = document.getElementById('results');
+            resultsDiv.innerHTML = '<pre>' + JSON.stringify(data, null, 2) + '</pre>';
+        }
+    </script>
+</body>
+</html>

@@ -1,21 +1,21 @@
-from flask import Flask, jsonify, request
+from flask import Flask, jsonify, request, render_template
 from flight_objects import flightdata
 from enum import Enum
 from FlightDatabase import FlightDatabase
 from helpers import sortbyDate, sortbyDuration
 from Flight import Flight
 from Seats import SingleLinkedSeatingList
+from flask_cors import CORS
 
 """
-DONE GET flight by ID
-DONE GET direct and indirect flights for src & dest
-DONE GET flights sorted by time, depart date etc
-DONE GET seats of a flight sorted by cost, status, id (class)
-DONE GET available seats of a flight
-DONE GET a single seat of a flight ?
+ GET flight by ID
+ GET direct and indirect flights for src & dest
+ GET flights sorted by time, depart date etc
+ GET seats of a flight sorted by cost, status, id (class)
+ GET a single seat of a flight ?
 
-DONE POST a flight's seat as booked 
-DONE POST a flight's seat as cancelled (unbooked)
+ POST a flight's seat as booked 
+ POST a flight's seat as cancelled (unbooked)
 """
 app = Flask(__name__)
 
@@ -151,7 +151,13 @@ def cancel_seat(flight_id, seat_id):
     else:
         return jsonify({"error": "Seat does not exist or is either available and cannot be cancelled"}), 404   
 
+@app.route('/')
+def index():
+    return render_template('index.html')
 
 # Run Flask app if executed directly
 if __name__ == '__main__':
     app.run(debug=True)
+    CORS(app)
+
+    
