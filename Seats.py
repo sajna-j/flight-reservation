@@ -7,6 +7,13 @@ class SeatNode:
         self.status = status
         self.cost = cost
         self.next = None
+    
+    def as_dict(self):
+        return {
+            "seat_number": self.data,
+            "status": self.status,
+            "cost": self.cost
+        }
 
 class SingleLinkedSeatingList:
     def __init__(self):
@@ -134,7 +141,7 @@ class SingleLinkedSeatingList:
             while (curNode is not None and curNode.next is not None):
                 futureNode = curNode.next
                 # check to see if the current song name lexicographically comes before the next song in the list
-                if (curNode.cost < futureNode.cost):
+                if (curNode.cost > futureNode.cost):
 
                     # this condition is reached if the current song should not be going before the next song
                     # swap the positions of the current node and the next node seen in the list
@@ -213,7 +220,7 @@ class SingleLinkedSeatingList:
             while (curNode is not None and curNode.next is not None):
 
                 # check to see if the current song name lexicographically comes before the next song in the list
-                if (curNode.status > curNode.status.data):
+                if (curNode.status > curNode.status):
 
                     # this condition is reached if the current song should not be going before the next song
                     # swap the positions of the current node and the next node seen in the list
@@ -225,26 +232,25 @@ class SingleLinkedSeatingList:
                 # reassign pointers to make the next item of the list be the current node
                 curNode = curNode.next
 
-    def book_seat(self, available_seat_list):
-        user_seat_input = int(input("Please enter a seat number to book: "))
+    def book_seat(self, available_seat_list, seat_number):
 
         curr_available_seat_node = available_seat_list.head
         index_count = 0
 
-        while curr_available_seat_node.next is not None and curr_available_seat_node.data != user_seat_input:
+        while curr_available_seat_node.next is not None and curr_available_seat_node.data != seat_number:
             index_count += 1
             curr_available_seat_node = curr_available_seat_node.next
 
-        if user_seat_input == curr_available_seat_node.data:
-            self.insert_at_end_status_cost_distrib(user_seat_input, curr_available_seat_node.cost, curr_available_seat_node.status)
-            print(f"Seat {user_seat_input} has been booked")
+        if seat_number == curr_available_seat_node.data:
+            self.insert_at_end_status_cost_distrib(seat_number, curr_available_seat_node.cost, curr_available_seat_node.status)
+            print(f"Seat {seat_number} has been booked")
             print()
 
-            print(f"Seat {user_seat_input} has been added to the BOOKED LIST")
+            print(f"Seat {seat_number} has been added to the BOOKED LIST")
             self.to_print()
 
             print()
-            print(f"Delete Seat: {user_seat_input} from the AVAILABLE LIST")
+            print(f"Delete Seat: {seat_number} from the AVAILABLE LIST")
             available_seat_list.delete_node_at_position(index_count)
             print()
         else:
@@ -253,9 +259,7 @@ class SingleLinkedSeatingList:
             print()
 
 
-    def cancel_a_seat(self, available_seat_list):
-        user_seat_input = int(input("Please enter a seat number to cancel: "))
-
+    def cancel_a_seat(self, available_seat_list, seat_number):
         if self.head is None:
             print("You can't cancel the seat. ERROR No Seats in Booked List to cancel")
             return
@@ -263,26 +267,26 @@ class SingleLinkedSeatingList:
         curr_booked_seat_node = self.head
         index_count = 0
 
-        while curr_booked_seat_node.next is not None and curr_booked_seat_node.data != user_seat_input:
+        while curr_booked_seat_node.next is not None and curr_booked_seat_node.data != seat_number:
             index_count += 1
             curr_booked_seat_node = curr_booked_seat_node.next
 
-        if curr_booked_seat_node.data == user_seat_input:
+        if curr_booked_seat_node.data == seat_number:
             curr_aval_seat_node = available_seat_list.head
             index_count_aval = 0
 
-            print(f"Seat {user_seat_input} has been cancelled")
+            print(f"Seat {seat_number} has been cancelled")
             print()
-            print(f"Delete Seat: {user_seat_input} from the BOOKED LIST")
+            print(f"Delete Seat: {seat_number} from the BOOKED LIST")
             self.delete_node_at_position(index_count)
 
-            while curr_aval_seat_node.next is not None and user_seat_input > curr_aval_seat_node.data:
+            while curr_aval_seat_node.next is not None and seat_number > curr_aval_seat_node.data:
                 curr_aval_seat_node = curr_aval_seat_node.next
                 index_count_aval += 1
 
             print()
-            print(f"Add Seat: {user_seat_input} to the AVAILABLE LIST")
-            available_seat_list.add_node_at_position(index_count_aval, user_seat_input, curr_aval_seat_node.cost, curr_aval_seat_node.status)
+            print(f"Add Seat: {seat_number} to the AVAILABLE LIST")
+            available_seat_list.add_node_at_position(index_count_aval, seat_number, curr_aval_seat_node.cost, curr_aval_seat_node.status)
         else:
             print("Sorry this seat cannot be cancelled")
 
@@ -331,6 +335,32 @@ class SingleLinkedSeatingList:
 
         new_node.next = curr_node.next
         curr_node.next = new_node
+
+    def get_seat(self, seat_number):
+        curr_available_seat_node = self.aval_seating_list.head
+        index_count = 0
+        
+        if curr_available_seat_node == None:
+            return None
+
+        while curr_available_seat_node.next is not None and curr_available_seat_node.data != seat_number:
+            index_count += 1
+            curr_available_seat_node = curr_available_seat_node.next
+
+        return curr_available_seat_node if curr_available_seat_node.data == seat_number else None
+
+    def get_booked_seat(self, seat_number):
+        curr_booked_seat_node = self.booked_seating_list.head
+        index_count = 0
+
+        if curr_booked_seat_node == None:
+            return None
+
+        while curr_booked_seat_node.next is not None and curr_booked_seat_node.data != seat_number:
+            index_count += 1
+            curr_booked_seat_node = curr_booked_seat_node.next
+
+        return curr_booked_seat_node if curr_booked_seat_node.data == seat_number else None
     
     def to_print(self):
         # Initialize the temp node to hold the current node
@@ -349,3 +379,13 @@ class SingleLinkedSeatingList:
             temp = temp.next
 
         print()  # Print a newline at the end
+
+    def as_list(self):
+        """ JSONifyable represention of the linked list """
+        temp = self.head
+        seats_list = []
+        while temp is not None:
+            print(f"Seat: {temp.data}, Type: {temp.status}, Cost: {temp.cost}", end="  |  ")
+            seats_list.append(temp.as_dict())
+            temp = temp.next
+        return seats_list
