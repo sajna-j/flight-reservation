@@ -3,32 +3,37 @@ import random
 from enum import Enum
 
 class SeatClass(Enum):
-    FIRST = "First"
-    BUSINESS = "Business"
-    ECONOMY = "Economy"
+    FIRST = ("First", 1)
+    BUSINESS = ("Business", 2)
+    ECONOMY = ("Economy", 3)
 
-    _order = {
-        "First": 1,
-        "Business": 2,
-        "Economy": 3
-    }
+    def __init__(self, label, weight):
+        self.label = label
+        self.weight = weight
 
     def __lt__(self, other):
-        if isinstance(other, SeatStatus):
-            return self._order[self.value] < self._order[other.value]
+        if self.__class__ is other.__class__:
+            return self.weight < other.weight
         return NotImplemented
+
+    @classmethod
+    def from_string(cls, label):
+        for member in cls:
+            if member.label.lower() == label.lower():
+                return member
+        raise ValueError(f"No SeatClass found for '{label}'")
 
 class SeatNode:
     def __init__(self, data=0, status= "Economy", cost=100):
         self.data = data
-        self.status = SeatClass(status)
+        self.status = SeatClass.from_string(status)
         self.cost = cost
         self.next = None
     
     def as_dict(self):
         return {
             "seat_number": self.data,
-            "status": self.status.value,
+            "status": self.status.value[0],
             "cost": self.cost
         }
 
