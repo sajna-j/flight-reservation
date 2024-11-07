@@ -153,7 +153,7 @@ def cancel_seat(flight_id, seat_id):
 
 @app.route('/')
 def index():
-    return render_template('index.html')
+    return render_template('flight_booking.html')
 
 # Run Flask app if executed directly
 if __name__ == '__main__':
