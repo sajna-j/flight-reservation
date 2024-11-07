@@ -103,7 +103,7 @@ class Flight(SingleLinkedSeatingList):
             "flight_number": self.flightNumber,
             "departure": self.departureLocation,
             "arrival": self.arrivalLocation,
-            "date": self.date,
+            "date": self.date + timedelta(hours=self.timeInterval[0]),
             "duration": self.duration
         }
 

@@ -1,17 +1,34 @@
 from collections import deque
 import random
+from enum import Enum
+
+class SeatClass(Enum):
+    FIRST = "First"
+    BUSINESS = "Business"
+    ECONOMY = "Economy"
+
+    _order = {
+        "First": 1,
+        "Business": 2,
+        "Economy": 3
+    }
+
+    def __lt__(self, other):
+        if isinstance(other, SeatStatus):
+            return self._order[self.value] < self._order[other.value]
+        return NotImplemented
 
 class SeatNode:
     def __init__(self, data=0, status= "Economy", cost=100):
         self.data = data
-        self.status = status
+        self.status = SeatClass(status)
         self.cost = cost
         self.next = None
     
     def as_dict(self):
         return {
             "seat_number": self.data,
-            "status": self.status,
+            "status": self.status.value,
             "cost": self.cost
         }
 
@@ -123,7 +140,7 @@ class SingleLinkedSeatingList:
         
 
         # initialize a flag to check if the songs are required to swap
-        swappingNodeFlag = True;
+        swappingNodeFlag = True
 
 
         # iterate over the amount of swaps necessary to properly sort the list in lexicographical order
@@ -163,7 +180,7 @@ class SingleLinkedSeatingList:
         
 
         # initialize a flag to check if the songs are required to swap
-        swappingNodeFlag = True;
+        swappingNodeFlag = True
 
 
         # iterate over the amount of swaps necessary to properly sort the list in lexicographical order
@@ -202,7 +219,7 @@ class SingleLinkedSeatingList:
         
 
         # initialize a flag to check if the songs are required to swap
-        swappingNodeFlag = True;
+        swappingNodeFlag = True
 
 
         # iterate over the amount of swaps necessary to properly sort the list in lexicographical order
@@ -220,7 +237,7 @@ class SingleLinkedSeatingList:
             while (curNode is not None and curNode.next is not None):
 
                 # check to see if the current song name lexicographically comes before the next song in the list
-                if (curNode.status > curNode.status):
+                if (curNode.status > curNode.next.status):
 
                     # this condition is reached if the current song should not be going before the next song
                     # swap the positions of the current node and the next node seen in the list
