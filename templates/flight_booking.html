@@ -43,21 +43,15 @@
 </div>
 
 <script>
-    // Function to fetch flights based on search criteria
-    document.getElementById('search-form').addEventListener('submit', function(event) {
-        event.preventDefault();
-        
-        const depart = document.getElementById('depart').value;
-        const arrive = document.getElementById('arrive').value;
-        const sort_by = document.getElementById('sort_by').value;
-
-        fetch(`/direct-flights?depart=${depart}&arrive=${arrive}&sort_by=${sort_by}`)
+    // Function to fetch and display seats for a selected flight
+    function viewSeats(flightId) {
+        fetch(`/flights/${flightId}/seats`)
             .then(response => response.json())
             .then(data => {
-                displayFlights(data);
+                displaySeats(data, flightId);
             })
-            .catch(error => console.error('Error fetching flights:', error));
-    });
+            .catch(error => console.error('Error fetching seats:', error));
+    }
 
     // Function to display flights in the DOM
     function displayFlights(flights) {
@@ -71,21 +65,14 @@
                 <div class="card-body">
                     <h5>Flight ID: ${flight.flight_number}</h5>
                     <p>From: ${flight.departure} - To: ${flight.arrival}</p>
-                    <button onclick="viewSeats(${flight.flight_number})" class="btn btn-secondary">View Seats</button>
+                    <p>Departs: ${flight.date}</p>
+                    <p>Duration: ${flight.duration} min</p>
+                    <button onclick="viewSeats('${flight.flight_number}')" class="btn btn-secondary">View Seats</button>
+
                 </div>
             `;
             flightsList.appendChild(flightCard);
         });
-    }
-
-    // Function to fetch and display seats for a selected flight
-    function viewSeats(flightId) {
-        fetch(`/flights/${flightId}/seats`)
-            .then(response => response.json())
-            .then(data => {
-                displaySeats(data, flightId);
-            })
-            .catch(error => console.error('Error fetching seats:', error));
     }
 
     // Function to display seats in the DOM with sorting and booking options
@@ -95,7 +82,7 @@
             <h3>Seats for Flight ID: ${flightId}</h3>
             <div class="form-group">
                 <label for="sort-seats">Sort Seats By:</label>
-                <select id="sort-seats" onchange="sortSeats(${flightId})" class="form-control">
+                <select id="sort-seats" onchange="sortSeats('${flightId}')" class="form-control">
                     <option value="cost">Cost</option>
                     <option value="status">Status</option>
                     <option value="id">Seat ID</option>
@@ -117,9 +104,9 @@
             seatCard.className = 'card my-2';
             seatCard.innerHTML = `
                 <div class="card-body">
-                    <h5>Seat ID: ${seat.id} - Class: ${seat.class} - Cost: $${seat.cost}</h5>
-                    <p>Status: ${seat.status}</p>
-                    <button onclick="toggleBooking(${flightId}, ${seat.id}, '${seat.status}')" class="btn btn-${seat.status === 'booked' ? 'danger' : 'primary'}">
+                    <h5>Seat ${seat.seat_number} - ${seat.status}</h5>
+                    <p>Cost: $${seat.cost}</p>
+                    <button onclick="toggleBooking('${flightId}', '${seat.seat_number}', '${seat.status}')" class="btn btn-${seat.status === 'booked' ? 'danger' : 'primary'}">
                         ${seat.status === 'booked' ? 'Cancel' : 'Book'}
                     </button>
                 </div>
@@ -152,6 +139,23 @@
             })
             .catch(error => console.error('Error sorting seats:', error));
     }
+
+        // Function to fetch flights based on search criteria
+        document.getElementById('search-form').addEventListener('submit', function(event) {
+        event.preventDefault();
+        
+        const depart = document.getElementById('depart').value;
+        const arrive = document.getElementById('arrive').value;
+        const sort_by = document.getElementById('sort_by').value;
+
+        fetch(`/direct-flights?depart=${depart}&arrive=${arrive}&sort_by=${sort_by}`)
+            .then(response => response.json())
+            .then(data => {
+                displayFlights(data);
+            })
+            .catch(error => console.error('Error fetching flights:', error));
+    });
+
 </script>
 
 </body>
