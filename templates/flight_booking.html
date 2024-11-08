@@ -5,12 +5,31 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Flight Booking App</title>
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <style>
+        /* Set fixed height for each box and make them scrollable */
+        #flights-list, #seats-list, #booked-flights-list {
+            max-height: 500px;
+            height: 500px;
+            overflow-y: auto;
+        }
+
+        /* Adjust the width of each column */
+        .col-custom {
+            padding-left: 5px;
+            padding-right: 5px;
+        }
+
+        /* Ensure the boxes fill the available width */
+        .card {
+            width: 100%;
+        }
+    </style>
 </head>
 <body>
 
-<div class="container my-5">
-    <h1 class="text-center">Flight Booking App</h1>
-    
+<div class="container-fluid my-5">
+    <h1 class="text-center">Flight Booker!</h1>
+
     <!-- Flight Search Section -->
     <div class="card my-3">
         <div class="card-body">
@@ -36,26 +55,50 @@
                         </select>
                     </div>
                 </div>
-                </div>
                 <button type="submit" class="btn btn-primary mt-3">Search Flights</button>
             </form>
         </div>
     </div>
-    
-    <!-- Flight Results Section -->
-    <div id="flights-list" class="my-3"></div>
 
-    <!-- Seats Section -->
-    <div id="seats-list" class="my-3"></div>
+    <!-- Main Content Section -->
+    <div class="row">
+        <!-- Left Column: Flight Results -->
+        <div class="col-md-4 col-custom">
+            <div class="card">
+                <div class="card-body">
+                    <h3>Available Flights</h3>
+                    <div id="flights-list"></div>
+                </div>
+            </div>
+        </div>
 
-    <!-- My Seats Section -->
-    <div id="booked-flights-list" class="my-3"></div>
+        <!-- Middle Column: Seats List -->
+        <div class="col-md-4 col-custom">
+            <div class="card">
+                <div class="card-body">
+                    <h3>Seats for Selected Flight</h3>
+                    <div id="seats-list"></div>
+                </div>
+            </div>
+        </div>
 
+        <!-- Right Column: Booked Seats List -->
+        <div class="col-md-4 col-custom">
+            <div class="card">
+                <div class="card-body">
+                    <h3>Your Booked Seats</h3>
+                    <div id="booked-flights-list"></div>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
-
-<script>
+    <script>
+    let currentViewedFlightId = null;
     // Function to fetch and display seats for a selected flight
     function viewSeats(flightId) {
+        currentViewedFlightId = flightId; // Store the current flight ID
+
         fetch(`/flights/${flightId}/seats`)
             .then(response => response.json())
             .then(data => {
@@ -67,7 +110,6 @@
     // Function to display flights in the DOM
     function displayFlights(flights) {
         const flightsList = document.getElementById('flights-list');
-        flightsList.innerHTML = '<h3>Available Flights</h3>';
         
         flights.forEach(flight => {
             const flightCard = document.createElement('div');
@@ -89,7 +131,6 @@
     // Function to display indirect flights in the DOM
     function displayIndirectFlights(indirectFlights) {
         const flightsList = document.getElementById('flights-list');
-        flightsList.innerHTML = '<h3>Available Indirect Flights</h3>';
 
         // Iterate through each list of flight segments (representing a route)
         indirectFlights.forEach((route, routeIndex) => {
@@ -122,7 +163,7 @@
     function displaySeats(seats, flightId) {
         const seatsList = document.getElementById('seats-list');
         seatsList.innerHTML = `
-            <h3>Seats for Flight ID: ${flightId}</h3>
+            <h3>Selected: ${flightId}</h3>
             <div class="form-group">
                 <label for="sort-seats">Sort Seats By:</label>
                 <select id="sort-seats" onchange="sortSeats('${flightId}')" class="form-control">
@@ -167,13 +208,13 @@
             .then(response => response.json())
             .then(data => {
                 alert(`Seat ${action === 'cancel' ? 'cancelled' : 'booked'} successfully.`);
+                // Refresh the list of available seats for the flight
                 viewSeats(flightId);
-                // Refresh the booked flights list after booking or cancellation
+                // Refresh the booked flights list to show the update
                 fetchBookedFlights();
             })
             .catch(error => console.error('Error toggling booking:', error));
     }
-
     // Function to sort seats and refresh the display
     function sortSeats(flightId) {
         const sortBy = document.getElementById('sort-seats').value;
@@ -227,11 +268,13 @@
     // Function to display booked flights in the DOM
     function displayBookedFlights(bookedFlights) {
         const bookedFlightsList = document.getElementById('booked-flights-list');
-        bookedFlightsList.innerHTML = '<h3>Your Booked Flights</h3>';
+
+        // Clear the existing content before displaying new data
+        bookedFlightsList.innerHTML = '';
 
         // Check if there are any booked flights
         if (Object.keys(bookedFlights).length === 0) {
-            bookedFlightsList.innerHTML += '<p>No booked flights found.</p>';
+            bookedFlightsList.innerHTML = '<p>No booked flights found.</p>';
             return;
         }
 
@@ -243,10 +286,6 @@
 
             // Iterate through each booked seat in the flight
             seats.forEach(seat => {
-                console.log(seat)
-                console.log("Seat number: ", seat.seat_number)
-                console.log("Seat status: ", seat.status)
-
                 const seatCard = document.createElement('div');
                 seatCard.className = 'card my-2';
                 seatCard.innerHTML = `
@@ -265,6 +304,7 @@
         });
     }
 
+
     // Function to cancel a booked seat
     function cancelSeat(flightId, seatId) {
         const url = `/flights/${flightId}/seats/${seatId}/cancel`;
@@ -273,9 +313,13 @@
             .then(response => response.json())
             .then(data => {
                 alert(`Seat ${seatId} has been successfully canceled.`);
-                // Refresh the list of available seats for the flight
-                viewSeats(flightId);
-                // Refresh the booked flights list as well
+
+                // Only refresh the list of available seats if the canceled seat belongs to the currently viewed flight
+                if (flightId === currentViewedFlightId) {
+                    viewSeats(flightId);
+                }
+
+                // Always refresh the booked flights list
                 fetchBookedFlights();
             })
             .catch(error => console.error('Error canceling seat:', error));
