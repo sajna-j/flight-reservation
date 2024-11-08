@@ -1,6 +1,7 @@
 from collections import deque
 import random
 from enum import Enum
+from typing import Union
 
 class SeatClass(Enum):
     FIRST = ("First", 1)
@@ -19,14 +20,14 @@ class SeatClass(Enum):
     @classmethod
     def from_string(cls, label):
         for member in cls:
-            if member.label.lower() == label.lower():
+            if member.value[0] == label:
                 return member
         raise ValueError(f"No SeatClass found for '{label}'")
 
 class SeatNode:
-    def __init__(self, data=0, status= "Economy", cost=100):
+    def __init__(self, data=0, cost=100, status: Union[str, SeatClass]= "Economy"):
         self.data = data
-        self.status = SeatClass.from_string(status)
+        self.status = SeatClass.from_string(status) if isinstance(status, str) else status
         self.cost = cost
         self.next = None
     
