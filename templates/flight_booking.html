@@ -17,18 +17,25 @@
             <h3>Search Flights</h3>
             <form id="search-form">
                 <div class="form-row">
-                    <div class="col-md-4">
+                    <div class="col-md-3">
                         <input type="text" id="depart" class="form-control" placeholder="Departure Location" required>
                     </div>
-                    <div class="col-md-4">
+                    <div class="col-md-3">
                         <input type="text" id="arrive" class="form-control" placeholder="Arrival Location" required>
                     </div>
-                    <div class="col-md-4">
+                    <div class="col-md-3">
                         <select id="sort_by" class="form-control">
                             <option value="date">Sort by Date</option>
                             <option value="duration">Sort by Duration</option>
                         </select>
                     </div>
+                    <div class="col-md-3">
+                        <select id="route_type" class="form-control">
+                            <option value="direct">Direct Flights</option>
+                            <option value="indirect">Indirect Flights</option>
+                        </select>
+                    </div>
+                </div>
                 </div>
                 <button type="submit" class="btn btn-primary mt-3">Search Flights</button>
             </form>
@@ -72,6 +79,38 @@
                 </div>
             `;
             flightsList.appendChild(flightCard);
+        });
+    }
+
+    // Function to display indirect flights in the DOM
+    function displayIndirectFlights(indirectFlights) {
+        const flightsList = document.getElementById('flights-list');
+        flightsList.innerHTML = '<h3>Available Indirect Flights</h3>';
+
+        // Iterate through each list of flight segments (representing a route)
+        indirectFlights.forEach((route, routeIndex) => {
+            const routeCard = document.createElement('div');
+            routeCard.className = 'card my-3';
+            routeCard.innerHTML = `<h5>Indirect Route ${routeIndex + 1}</h5>`;
+
+            // Iterate through each flight segment in the route
+            route.forEach((flight, flightIndex) => {
+                const flightSegment = document.createElement('div');
+                flightSegment.className = 'card my-2';
+                flightSegment.innerHTML = `
+                    <div class="card-body">
+                        <h6>Flight ${flightIndex + 1}</h6>
+                        <h5>Flight ID: ${flight.flight_number}</h5>
+                        <p>From: ${flight.departure} - To: ${flight.arrival}</p>
+                        <p>Departs: ${flight.date}</p>
+                        <p>Duration: ${flight.duration} min</p>
+                        <button onclick="viewSeats('${flight.flight_number}')" class="btn btn-secondary">View Seats</button>
+                    </div>
+                `;
+                routeCard.appendChild(flightSegment);
+            });
+
+            flightsList.appendChild(routeCard);
         });
     }
 
@@ -147,11 +186,16 @@
         const depart = document.getElementById('depart').value;
         const arrive = document.getElementById('arrive').value;
         const sort_by = document.getElementById('sort_by').value;
+        const route_type = document.getElementById('route_type').value;
 
-        fetch(`/direct-flights?depart=${depart}&arrive=${arrive}&sort_by=${sort_by}`)
+        fetch(`/${route_type}-flights?depart=${depart}&arrive=${arrive}&sort_by=${sort_by}`)
             .then(response => response.json())
             .then(data => {
+            if (route_type === 'indirect') {
+                displayIndirectFlights(data);
+            } else {
                 displayFlights(data);
+            }
             })
             .catch(error => console.error('Error fetching flights:', error));
     });
