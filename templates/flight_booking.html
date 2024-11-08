@@ -47,6 +47,10 @@
 
     <!-- Seats Section -->
     <div id="seats-list" class="my-3"></div>
+
+    <!-- My Seats Section -->
+    <div id="booked-flights-list" class="my-3"></div>
+
 </div>
 
 <script>
@@ -156,13 +160,16 @@
 
     // Function to toggle booking status of a seat
     function toggleBooking(flightId, seatId, status) {
-        const url = `/flights/${flightId}/seats/${seatId}/${status === 'booked' ? 'cancel' : 'book'}`;
-        
+        const action = status === 'booked' ? 'cancel' : 'book';
+        const url = `/flights/${flightId}/seats/${seatId}/${action}`;
+
         fetch(url, { method: 'POST' })
             .then(response => response.json())
             .then(data => {
-                alert(`Seat ${status === 'booked' ? 'cancelled' : 'booked'} successfully.`);
+                alert(`Seat ${action === 'cancel' ? 'cancelled' : 'booked'} successfully.`);
                 viewSeats(flightId);
+                // Refresh the booked flights list after booking or cancellation
+                fetchBookedFlights();
             })
             .catch(error => console.error('Error toggling booking:', error));
     }
@@ -206,6 +213,77 @@
             })
             .catch(error => console.error('Error fetching flights:', error));
     });
+
+    // Function to fetch and display booked flights
+    function fetchBookedFlights() {
+        fetch('/booked-seats')
+            .then(response => response.json())
+            .then(data => {
+                displayBookedFlights(data);
+            })
+            .catch(error => console.error('Error fetching booked flights:', error));
+    }
+
+    // Function to display booked flights in the DOM
+    function displayBookedFlights(bookedFlights) {
+        const bookedFlightsList = document.getElementById('booked-flights-list');
+        bookedFlightsList.innerHTML = '<h3>Your Booked Flights</h3>';
+
+        // Check if there are any booked flights
+        if (Object.keys(bookedFlights).length === 0) {
+            bookedFlightsList.innerHTML += '<p>No booked flights found.</p>';
+            return;
+        }
+
+        // Iterate through each flight in the booked flights
+        Object.entries(bookedFlights).forEach(([flightId, seats]) => {
+            const flightCard = document.createElement('div');
+            flightCard.className = 'card my-3';
+            flightCard.innerHTML = `<h5>Flight ID: ${flightId}</h5>`;
+
+            // Iterate through each booked seat in the flight
+            seats.forEach(seat => {
+                console.log(seat)
+                console.log("Seat number: ", seat.seat_number)
+                console.log("Seat status: ", seat.status)
+
+                const seatCard = document.createElement('div');
+                seatCard.className = 'card my-2';
+                seatCard.innerHTML = `
+                    <div class="card-body">
+                        <h5>Seat ${seat.seat_number} - ${seat.status}</h5>
+                        <p>Cost: $${seat.cost}</p>
+                        <button onclick="cancelSeat('${flightId}', '${seat.seat_number}')" class="btn btn-danger">
+                            Cancel Seat
+                        </button>
+                    </div>
+                `;
+                flightCard.appendChild(seatCard);
+            });
+
+            bookedFlightsList.appendChild(flightCard);
+        });
+    }
+
+    // Function to cancel a booked seat
+    function cancelSeat(flightId, seatId) {
+        const url = `/flights/${flightId}/seats/${seatId}/cancel`;
+
+        fetch(url, { method: 'POST' })
+            .then(response => response.json())
+            .then(data => {
+                alert(`Seat ${seatId} has been successfully canceled.`);
+                // Refresh the list of available seats for the flight
+                viewSeats(flightId);
+                // Refresh the booked flights list as well
+                fetchBookedFlights();
+            })
+            .catch(error => console.error('Error canceling seat:', error));
+    }
+
+    // Fetch booked flights when the page loads
+    document.addEventListener('DOMContentLoaded', fetchBookedFlights);
+
 
 </script>
 

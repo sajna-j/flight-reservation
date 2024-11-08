@@ -38,7 +38,7 @@ class Flight(SingleLinkedSeatingList):
                 costSeat = round(2*economy_class_count + random.uniform(1, 2)*duration + random.uniform(1, 10), 2)
                 classStatus = "Economy"
             
-            aval_seating_list.insert_at_end_status_cost_distrib(seatNumber, classStatus, costSeat)
+            aval_seating_list.insert_at_end_status_cost_distrib(seatNumber, costSeat, classStatus)
 
         self.aval_seating_list  = aval_seating_list
         self.booked_seating_list = booked_seating_list
