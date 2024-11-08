@@ -180,22 +180,30 @@
     }
 
         // Function to fetch flights based on search criteria
-        document.getElementById('search-form').addEventListener('submit', function(event) {
+        // Function to fetch flights based on search criteria
+    document.getElementById('search-form').addEventListener('submit', function (event) {
         event.preventDefault();
-        
+
         const depart = document.getElementById('depart').value;
         const arrive = document.getElementById('arrive').value;
         const sort_by = document.getElementById('sort_by').value;
         const route_type = document.getElementById('route_type').value;
 
+        // Clear previous results
+        const flightsList = document.getElementById('flights-list');
+        const seatsList = document.getElementById('seats-list');
+        flightsList.innerHTML = '';
+        seatsList.innerHTML = '';
+
+        // Fetch data from the appropriate endpoint
         fetch(`/${route_type}-flights?depart=${depart}&arrive=${arrive}&sort_by=${sort_by}`)
             .then(response => response.json())
             .then(data => {
-            if (route_type === 'indirect') {
-                displayIndirectFlights(data);
-            } else {
-                displayFlights(data);
-            }
+                if (route_type === 'indirect') {
+                    displayIndirectFlights(data);
+                } else {
+                    displayFlights(data);
+                }
             })
             .catch(error => console.error('Error fetching flights:', error));
     });
