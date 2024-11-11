@@ -1,17 +1,40 @@
 from collections import deque
 import random
+from enum import Enum
+from typing import Union
+
+class SeatClass(Enum):
+    FIRST = ("First", 1)
+    BUSINESS = ("Business", 2)
+    ECONOMY = ("Economy", 3)
+
+    def __init__(self, label, weight):
+        self.label = label
+        self.weight = weight
+
+    def __lt__(self, other):
+        if self.__class__ is other.__class__:
+            return self.weight < other.weight
+        return NotImplemented
+
+    @classmethod
+    def from_string(cls, label):
+        for member in cls:
+            if member.value[0] == label:
+                return member
+        raise ValueError(f"No SeatClass found for '{label}'")
 
 class SeatNode:
-    def __init__(self, data=0, status= "Economy", cost=100):
+    def __init__(self, data=0, cost=100, status: Union[str, SeatClass]= "Economy"):
         self.data = data
-        self.status = status
+        self.status = SeatClass.from_string(status) if isinstance(status, str) else status
         self.cost = cost
         self.next = None
     
     def as_dict(self):
         return {
             "seat_number": self.data,
-            "status": self.status,
+            "status": self.status.value[0],
             "cost": self.cost
         }
 
@@ -123,7 +146,7 @@ class SingleLinkedSeatingList:
         
 
         # initialize a flag to check if the songs are required to swap
-        swappingNodeFlag = True;
+        swappingNodeFlag = True
 
 
         # iterate over the amount of swaps necessary to properly sort the list in lexicographical order
@@ -163,7 +186,7 @@ class SingleLinkedSeatingList:
         
 
         # initialize a flag to check if the songs are required to swap
-        swappingNodeFlag = True;
+        swappingNodeFlag = True
 
 
         # iterate over the amount of swaps necessary to properly sort the list in lexicographical order
@@ -202,7 +225,7 @@ class SingleLinkedSeatingList:
         
 
         # initialize a flag to check if the songs are required to swap
-        swappingNodeFlag = True;
+        swappingNodeFlag = True
 
 
         # iterate over the amount of swaps necessary to properly sort the list in lexicographical order
@@ -220,7 +243,7 @@ class SingleLinkedSeatingList:
             while (curNode is not None and curNode.next is not None):
 
                 # check to see if the current song name lexicographically comes before the next song in the list
-                if (curNode.status > curNode.status):
+                if (curNode.status > curNode.next.status):
 
                     # this condition is reached if the current song should not be going before the next song
                     # swap the positions of the current node and the next node seen in the list

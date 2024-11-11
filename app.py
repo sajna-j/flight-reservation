@@ -1,21 +1,21 @@
-from flask import Flask, jsonify, request
+from flask import Flask, jsonify, request, render_template
 from flight_objects import flightdata
 from enum import Enum
 from FlightDatabase import FlightDatabase
 from helpers import sortbyDate, sortbyDuration
 from Flight import Flight
 from Seats import SingleLinkedSeatingList
+from flask_cors import CORS
 
 """
-DONE GET flight by ID
-DONE GET direct and indirect flights for src & dest
-DONE GET flights sorted by time, depart date etc
-DONE GET seats of a flight sorted by cost, status, id (class)
-DONE GET available seats of a flight
-DONE GET a single seat of a flight ?
+ GET flight by ID
+ GET direct and indirect flights for src & dest
+ GET flights sorted by time, depart date etc
+ GET seats of a flight sorted by cost, status, id (class)
+ GET a single seat of a flight ?
 
-DONE POST a flight's seat as booked 
-DONE POST a flight's seat as cancelled (unbooked)
+ POST a flight's seat as booked 
+ POST a flight's seat as cancelled (unbooked)
 """
 app = Flask(__name__)
 
@@ -112,7 +112,16 @@ def get_seat(flight_id, seat_id):
     if seat:
         return jsonify(seat.as_dict()), 200
     return jsonify({"error": "Seat not found"}), 404
-    
+
+# Endpoint to get all booked seats by flight in the database
+@app.route('/booked-seats', methods=['GET'])
+def get_booked_seats():
+    booked_seats = {}
+    for flight in flightdata.givenFlights:
+        if booked_seating_list := flight.booked_seating_list.as_list():
+            booked_seats[flight.flightNumber] = booked_seating_list
+    return jsonify(booked_seats), 200
+
 
 # Endpoint to book a seat in a flight
 @app.route('/flights/<flight_id>/seats/<int:seat_id>/book', methods=['POST'])
@@ -151,7 +160,13 @@ def cancel_seat(flight_id, seat_id):
     else:
         return jsonify({"error": "Seat does not exist or is either available and cannot be cancelled"}), 404   
 
+@app.route('/')
+def index():
+    return render_template('flight_booking.html')
 
 # Run Flask app if executed directly
 if __name__ == '__main__':
     app.run(debug=True)
+    CORS(app)
+
+    
