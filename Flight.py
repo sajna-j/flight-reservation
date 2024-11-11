@@ -1,7 +1,8 @@
 from Seats import SingleLinkedSeatingList
 from collections import deque
 import random
-from datetime import datetime
+from datetime import datetime, timedelta
+from typing import List
 
 class Flight(SingleLinkedSeatingList):
     def __init__(self, flightNumber, departureLocation, arrivalLocation, timeInterval, date, amountSeats=30, duration=30):
@@ -97,6 +98,15 @@ class Flight(SingleLinkedSeatingList):
         print("Business Class: Seat " + str(busSeatNum)+ ", Cost: " + str(busCostSum))
         print("Economy Class: Seat " + str(ecomSeatNum)+ ", Cost: " + str(ecomCostSum))
 
+    def as_dict(self):
+        return {
+            "flight_number": self.flightNumber,
+            "departure": self.departureLocation,
+            "arrival": self.arrivalLocation,
+            "date": self.date,
+            "duration": self.duration
+        }
+
     def main_menu_catalog_seating(self):
         # Initialize variables to store the single linked lists for available and booked seating
         # aval_seating_list = SingleLinkedSeatingList()
@@ -130,12 +140,14 @@ class Flight(SingleLinkedSeatingList):
                 case "1":
                     print("\nYou selected to Book a Seat")
                     self.aval_seating_list.sortBySeatNum()
-                    self.booked_seating_list.book_seat(self.aval_seating_list)
+                    user_seat_input = int(input("Please enter a seat number to book: "))
+                    self.booked_seating_list.book_seat(self.aval_seating_list, user_seat_input)
                     print()
                 case "2":
                     print("\nYou selected to Cancel a Seat")
                     self.aval_seating_list.sortBySeatNum()
-                    self.booked_seating_list.cancel_a_seat(self.aval_seating_list)
+                    user_seat_input = int(input("Please enter a seat number to cancel: "))
+                    self.booked_seating_list.cancel_a_seat(self.aval_seating_list, user_seat_input)
                     print()
                 case "3":
                     print("\nYou selected Display Available Seats. (Booked Seats)")
@@ -166,3 +178,20 @@ class Flight(SingleLinkedSeatingList):
                 case _:
                     print("\nYou selected an invalid option. Please reselect your input")
                     print()
+
+
+class IndirectFlight(Flight):
+    def __init__(self, departureLocation: str, arrivalLocation: str, innerFlights: List[Flight]):
+        self.departureLocation = departureLocation
+        self.arrivalLocation = arrivalLocation
+        first_flight_starts = innerFlights[0].date + timedelta(hours=innerFlights[0].timeInterval[0])
+        last_flight_ends = innerFlights[-1].date + timedelta(hours=innerFlights[-1].timeInterval[1])
+        self.duration: datetime.timedelta = last_flight_ends - first_flight_starts
+        self.date = innerFlights[0].date
+        self.flights = innerFlights
+    
+    def as_list(self):
+        flights_list = []
+        for flight in self.flights:
+            flights_list.append(flight.as_dict())
+        return flights_list

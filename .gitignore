@@ -1,0 +1,12 @@
+# Ignore the venv folder in the root directory
+/venv/
+
+# Ignore any folder named venv anywhere in the repository
+venv/
+
+# Ignore common virtual environment names
+env/
+.venv/
+ENV/
+
+__pycache__/
