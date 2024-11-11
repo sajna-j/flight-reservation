@@ -1,7 +1,7 @@
 from collections import deque
 import random
 from Flight import Flight, IndirectFlight
-
+# class to represent a flight
 class FlightDatabase():
     
     # constructor to allow multiple flight objects to be added
@@ -269,7 +269,3 @@ class FlightDatabase():
                     self.display_flight()
                 case _:
                     print("Invalid Input: Please Try Again")
-                self.givenFlights[self.get_flight(flight)].main_menu_catalog_seating()
-            else:
-                print("False")
-  
