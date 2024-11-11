@@ -4,22 +4,29 @@ from Flight import Flight, IndirectFlight
 
 class FlightDatabase():
     
+    # constructor to allow multiple flight objects to be added
     def __init__(self):
         self.givenFlights = []
 
+    # add a flight
     def add_flight(self, givenFlight):
         self.givenFlights.append(givenFlight)
     
+    # remove flight based on flight number
     def remove_flight(self, givenFlight, remove_flightNumber):
         self.givenFlights = [flight for flight in self.givenFlights if givenFlight.flightNumber != remove_flightNumber]
-    
+
+    # get the flight index seen in list 
     def get_flight(self, userInput):
         index = 0
+
+        # iterate over list to see if the flight exists
         for index in range(len(self.givenFlights)):
             if(userInput == self.givenFlights[index].flightNumber):
                 return index
         return -1
     
+    # to display all the flights in the database
     def display_flight(self):
 
         if not self.givenFlights:
@@ -28,18 +35,21 @@ class FlightDatabase():
             for currentFlight in self.givenFlights:
                 print(f'Flight ID Number: {currentFlight.flightNumber}, Departure Location: {currentFlight.departureLocation}, Arrival Location: {currentFlight.arrivalLocation}, Date: {currentFlight.date.month}/{currentFlight.date.day}/{currentFlight.date.year}, Time Interval: {currentFlight.timeInterval}, Time Duration: {currentFlight.duration}')
     
+    # check a check a Fligh Exists Based On FlightId
     def checkFlightExistsBasedOnFlightId(self, userInput):
         for curFlight in self.givenFlights:
             if(userInput == curFlight.flightNumber):
                 return True
         return False
     
+    # check if a flight exists
     def flightExists(self, fromSpace, toSpace):
         for curFlight in self.givenFlights:
             if(fromSpace == curFlight.departureLocation and toSpace == curFlight.arrivalLocation):
                 return True
         return False
     
+    # get a flight number 
     def getFlightNumber(self, fromSpace, toSpace):
         for curFlight in self.givenFlights:
             if(fromSpace == curFlight.departureLocation and toSpace == curFlight.arrivalLocation):
@@ -104,103 +114,69 @@ class FlightDatabase():
     
 
 
+    def is_overnight_flight(self, start_time, end_time):
+        return end_time < start_time
 
-
-        """
-        sortedFlights = sorted(self.givenFlights, key=lambda flight: flight.timeInterval[1])
-        sizeOfFlightLog = len(sortedFlights)
-
-        lastKnownEndTime = -1
-        index=1 
-
-        dpArray = [1] * sizeOfFlightLog
-        previousIndex = [-1] *sizeOfFlightLog
-
-        for index in range(1, sizeOfFlightLog):
-            for jindex in range(index):
-
-                curActivityStartTime = sortedFlights[jindex].timeInterval[0]
-                if (sortedFlights[index].timeInterval[1] <= curActivityStartTime):
-                    if (dpArray[index] < dpArray[jindex]+1):
-                        dpArray[index] = dpArray[jindex]+1
-                        previousIndex[index] = jindex
-        
-        maxIndex = dpArray.index(max(dpArray))
-        while -1 != maxIndex:
-            nonOverlapSced.append(sortedFlights[maxIndex])
-            maxIndex = previousIndex[maxIndex]
-        """
-        for flight in nonOverlapSced:
-            flight.display_flight()
-
-    """
-    #Use BFS
-    def find_indirect_flights(self, source, dest):
-        known_indirect_flights = []
-        visitedSet = set()  # To keep track of visited nodes
-
-        departure_map = {}
-        for flight in self.givenFlights:
-            if flight.departureLocation not in departure_map:
-                departure_map[flight.departureLocation] = []
-            departure_map[flight.departureLocation].append(flight)
-        
-        queue = deque([(source, [])])
-
-        while (queue):
-            currentFlight, flightPath = queue.popleft()
-
-            if currentFlight not in visitedSet:
-                visitedSet.add(currentFlight)
-            
-                if currentFlight in departure_map:
-                    for flight in departure_map[currentFlight]:
-                        curpath = flightPath + [flight.flightNumber]
-
-                        if flight.arrivalLocation == dest:
-                            known_indirect_flights.append(curpath)
-
-                        if flight.arrivalLocation not in visitedSet:
-                            queue.append((flight.arrivalLocation, curpath))
-
-        return known_indirect_flights   
-    """
-
-
+    # FOUND
     def find_indirect_flights_NonOverlap(self, source, dest):
+       
         known_indirect_flights = []
-        visitedSet = set()  # To keep track of visited nodes
-
         departure_map = {}
+        
+        # Create a map of departure locations to their flights
         for flight in self.givenFlights:
             if flight.departureLocation not in departure_map:
                 departure_map[flight.departureLocation] = []
             departure_map[flight.departureLocation].append(flight)
         
-        queue = deque([(source, [])])
+        # Queue for BFS (location, path, last end time, last date)
+        queue = deque([(source, [], None, None)])  # last end time and date initialized as None
 
-        while (queue):
-            currentFlight, flightPath = queue.popleft()
+        # Track visited combinations to avoid loops
+        visitedSet = set()
 
-            if currentFlight not in visitedSet:
-                visitedSet.add(currentFlight)
-            
-                if currentFlight in departure_map:
 
-                    for next_flight in departure_map[currentFlight]:
+        while queue:
+            current_location, flight_path, last_end_time, last_date = queue.popleft()
+
+            if current_location == dest:
+                # Complete path from source to destination found
+                flight_numbers = [flight.flightNumber for flight in flight_path]
+                if flight_numbers not in known_indirect_flights:
+                    known_indirect_flights.append(flight_numbers)
+                continue
+
+            if current_location in departure_map:
+                for next_flight in departure_map[current_location]:
+                    
+                    # Skip if we've already visited this specific path
+                    visit_key = (next_flight.flightNumber, next_flight.timeInterval, next_flight.date)
+                    if visit_key in visitedSet:
+                        continue
+                    visitedSet.add(visit_key)
+
+                    # Initial path setup
+                    if not flight_path:
+                        new_flight_path = [next_flight]
+                        queue.append((next_flight.arrivalLocation, new_flight_path, next_flight.timeInterval[1], next_flight.date))
+                    else:
                         
-                        if (not flightPath or flightPath[-1].timeInterval[1] <= next_flight.timeInterval[0] 
-                        and flightPath[-1].date <= next_flight.date and (next_flight.date - flightPath[-1].date).days <= 2):
-                            new_flight_path = flightPath + [next_flight]
-
-                            if(next_flight.arrivalLocation == dest):
-                                known_indirect_flights.append([plane.flightNumber for plane in  new_flight_path])
-
-                            if flight.arrivalLocation not in visitedSet:
-                                queue.append((next_flight.arrivalLocation, new_flight_path))
+                        # Apply non-overlapping and date constraints
+                        last_flight = flight_path[-1]
+                        last_end_time = last_flight.timeInterval[1]
+                        next_start_time = next_flight.timeInterval[0]
+                        is_overnight = self.is_overnight_flight(last_end_time, next_start_time)
+                        difference_dates_times = (next_flight.date - last_flight.date).days
+                        
+                        if ((last_end_time <= next_start_time or is_overnight) and
+                            last_flight.date <= next_flight.date and
+                            difference_dates_times <= 2):
+                            new_flight_path = flight_path + [next_flight]
+                            queue.append((next_flight.arrivalLocation, new_flight_path, next_flight.timeInterval[1], next_flight.date))
 
         return known_indirect_flights 
-    
+
+    #MADE CHANGE
     def display_indirect_flights(self, sourceLocation, destLocation):
         all_known_indirect_flights = self.find_indirect_flights_NonOverlap(sourceLocation, destLocation)
 
@@ -218,64 +194,81 @@ class FlightDatabase():
         else:
             print("No indirect flights available.")
 
-    def get_indirect_flights(self, sourceLocation, destLocation):
-        all_known_indirect_flights = self.find_indirect_flights_NonOverlap(sourceLocation, destLocation)
-        count = 1
-        indirect_flights = []
-        if all_known_indirect_flights is not None:
-            for curOverallFlightPath in all_known_indirect_flights:
-                if(len(curOverallFlightPath) > 1):
-                    print("Indirect Flight Option: " + str(count))
-                    count+=1
 
-                curr_flight_path = []
-                for curIndirectFlight in curOverallFlightPath:
-                    if(len(curOverallFlightPath) > 1):
-                        curr_flight_path.append(self.givenFlights[self.get_flight(curIndirectFlight)])
-                indirect_flight = IndirectFlight(sourceLocation, destLocation, curr_flight_path)
-                if curr_flight_path:
-                    indirect_flights.append(indirect_flight)
-        return indirect_flights
-
+    #MADE CHANGE
     def display_direct_flights(self, sourceLocation, destLocation):
         count = 1
-
+        printErrorFlag = True
         if self.givenFlights is not None:
             for cur_flight in self.givenFlights:
                 
                 if((cur_flight.departureLocation == sourceLocation) and (cur_flight.arrivalLocation == destLocation)):
                     print("Direct Flight Option: " + str(count))
+                    count+=1
                     cur_flight.display_flight()
+                    printErrorFlag = False
                     print()
-        else:
+        if(printErrorFlag):
             print("No direct flights available.")
-
-    def get_direct_flights(self, sourceLocation, destLocation):
-        count = 1
-        direct_flights = []
-        if self.givenFlights is not None:
-            for cur_flight in self.givenFlights:
-                if((cur_flight.departureLocation == sourceLocation) and (cur_flight.arrivalLocation == destLocation)):
-                    direct_flights.append(cur_flight)
-        return direct_flights
+            print()
         
-        
-    def select_flight_to_book(self):
-        print("Available Flight List")
-        self.display_flight()
-
-
-        fromDestination = input("Please Select a Flight Depature: " )
-        toDestination = input("Please Select a Flight Arrival: " )
-        index = input("1 to show avaliability or 2 to book the flight: ")
-
     
-        if(index == -1):
-            flightdata.sortbyDuration()
-        else:
-            if(self.flightExists(fromDestination, toDestination)):
+    # MADE CHANGE C                          
+    def select_flight_to_book(self):
 
-                flight = self.getFlightNumber(fromDestination, toDestination)
+        while True: 
+            print("\n--- Flight Booking Menu ---")
+            print("1. View Available Flights")
+            print("2. Show Availability for a Specific Route")
+            print("3. Book a Flight")
+            print("4. Sort and View Flights by Duration")
+            print("5. Exit")
+            user_input = input("Please choose an option (1-5): ")
+
+            match user_input:
+                case "1":
+                    print("\n --- Available Flights ---")
+                    self.display_flight()
+                    print()
+                case "2":
+                    print("\n --- Check Flight Availability Flights ---")
+                    fromDestination = input("Please Select a Flight Depature: " )
+                    toDestination = input("Please Select a Flight Arrival: " )
+
+                    print("\n --- Direct Flights ---")
+                    print(self.display_direct_flights(fromDestination, toDestination))
+                    print()
+                    print("\n --- Indirect Flights ---")
+                    print(self.display_indirect_flights(fromDestination, toDestination))                        
+                    print()
+                case "3":
+                    fromDestination = input("Please Select a Flight Depature: " )
+                    toDestination = input("Please Select a Flight Arrival: " )
+
+                    if(self.flightExists(fromDestination, toDestination)):
+                        flight_number = input("\nPlease Enter the Flight Number you want to book: ")
+                        flight_index = self.get_flight(flight_number)
+                        if flight_index is not None:
+                            self.givenFlights[flight_index].main_menu_catalog_seating()
+                        else:
+                            print("ERROR: Flight Number not Found")
+                    else:
+                        print("There are no flights present")
+                    print()
+                case "4":
+                    print("\n --- Flights Sorted by Duration ---")
+                    self.sortbyDuration()
+                    self.display_flight()
+                case "5":
+                    print("\nLeaving Flight Booking Menu")
+                    print()
+                    exit()
+                case "6":
+                    print("\n --- Flights Sorted by Duration ---")
+                    self.sortbyDuration()
+                    self.display_flight()
+                case _:
+                    print("Invalid Input: Please Try Again")
                 self.givenFlights[self.get_flight(flight)].main_menu_catalog_seating()
             else:
                 print("False")
