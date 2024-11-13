@@ -211,7 +211,35 @@ class FlightDatabase():
         if(printErrorFlag):
             print("No direct flights available.")
             print()
+
+    
+    def get_indirect_flights(self, sourceLocation, destLocation):
+        all_known_indirect_flights = self.find_indirect_flights_NonOverlap(sourceLocation, destLocation)
+        count = 1
+        indirect_flights = []
+        if all_known_indirect_flights is not None:
+            for curOverallFlightPath in all_known_indirect_flights:
+                if(len(curOverallFlightPath) > 1):
+                    print("Indirect Flight Option: " + str(count))
+                    count+=1
+                curr_flight_path = []
+                for curIndirectFlight in curOverallFlightPath:
+                    if(len(curOverallFlightPath) > 1):
+                        curr_flight_path.append(self.givenFlights[self.get_flight(curIndirectFlight)])
+                if curr_flight_path:
+                    indirect_flight = IndirectFlight(sourceLocation, destLocation, curr_flight_path)
+                    indirect_flights.append(indirect_flight)
+        return indirect_flights
         
+    
+    def get_direct_flights(self, sourceLocation, destLocation):
+        count = 1
+        direct_flights = []
+        if self.givenFlights is not None:
+            for cur_flight in self.givenFlights:
+                if((cur_flight.departureLocation == sourceLocation) and (cur_flight.arrivalLocation == destLocation)):
+                    direct_flights.append(cur_flight)
+        return direct_flights
     
     # MADE CHANGE C                          
     def select_flight_to_book(self):
