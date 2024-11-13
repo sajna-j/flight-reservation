@@ -6,6 +6,7 @@ from helpers import sortbyDate, sortbyDuration
 from Flight import Flight
 from Seats import SingleLinkedSeatingList
 from flask_cors import CORS
+import datetime
 
 """
  GET flight by ID
@@ -39,6 +40,9 @@ SORT_MAPPING = {
     SeatSortOptions.ID: SingleLinkedSeatingList.sortBySeatNum,
     SeatSortOptions.STATUS: SingleLinkedSeatingList.sortBySeatStatus
 }
+
+def convert_timedelta(deltatime: datetime.timedelta):
+    return round(deltatime.total_seconds() / 3600, 2)
 
 # Endpoint to get a flight by ID
 @app.route('/flights/<flight_id>', methods=['GET'])
@@ -76,7 +80,7 @@ def get_indirect_flights_route():
 
     jsonable_results = []
     for indirect_flight in flights_results:
-        jsonable_results.append(indirect_flight.as_list())
+        jsonable_results.append({"duration": convert_timedelta(indirect_flight.duration), "route": indirect_flight.as_list()})
     return jsonify(jsonable_results), 200
 
 
