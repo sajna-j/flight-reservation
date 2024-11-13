@@ -131,15 +131,15 @@
     // Function to display indirect flights in the DOM
     function displayIndirectFlights(indirectFlights) {
         const flightsList = document.getElementById('flights-list');
-
+        
         // Iterate through each list of flight segments (representing a route)
         indirectFlights.forEach((route, routeIndex) => {
             const routeCard = document.createElement('div');
             routeCard.className = 'card my-3';
-            routeCard.innerHTML = `<h5>Indirect Route ${routeIndex + 1}</h5>`;
+            routeCard.innerHTML = `<h5>Indirect Route ${routeIndex + 1}, Total Time: ${route.duration} Hours</h5>`;
 
             // Iterate through each flight segment in the route
-            route.forEach((flight, flightIndex) => {
+            route.route.forEach((flight, flightIndex) => {
                 const flightSegment = document.createElement('div');
                 flightSegment.className = 'card my-2';
                 flightSegment.innerHTML = `
