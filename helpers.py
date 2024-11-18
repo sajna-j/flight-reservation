@@ -12,9 +12,8 @@ def sortbyDuration(flights: List[Union[Flight, IndirectFlight]]):
         for jindex in range(len(flights)):
             if(flights[index].duration < flights[jindex].duration):
                 temp = flights[index]
-                temp2 = flights[jindex]
-                flights[jindex] =  temp
-                flights[index] =  temp2
+                flights[index] =  flights[jindex]
+                flights[jindex] = temp
     
     return flights
 
@@ -25,8 +24,7 @@ def sortbyDate(flights: List[Union[Flight, IndirectFlight]]):
         for jindex in range(len(flights)):
             if(flights[index].date < flights[jindex].date):
                 temp = flights[index]
-                temp2 = flights[jindex]
-                flights[jindex] =  temp
-                flights[index] =  temp2
+                flights[index] =  flights[jindex]
+                flights[jindex] = temp
     
     return flights
