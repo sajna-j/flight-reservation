@@ -168,7 +168,6 @@ def cancel_seat(flight_id, seat_id):
 def index():
     return render_template('flight_booking.html')
 
-# Run Flask app if executed directly
 if __name__ == '__main__':
     app.run(debug=True)
     CORS(app)
